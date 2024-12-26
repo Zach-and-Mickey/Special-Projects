@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wood Between the Worlds</title>
+	<style>
+body {
+    font-family: Arial, sans-serif;
+    background-image: url('Woods.jpg');
+    background-size: cover;
+    background-position: top;
+    background-repeat: no-repeat;
+    height: 100%
+    text-align: left;
+    margin: 50px;
+    font-size: 30px;
+}
+
+button {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.gameDiv {
+    color: white;
+    background-color: rgba(0,0,0,0.7);
+    border-radius: 10px;
+    padding: 20px;
+    display: none;  /* Hide all divs initially */
+}
+
+h1 {
+    font-size: 36px;
+    text-align: center;
+    color: black;
+    background-color: rgba(0,0,0,0.5);
+    text-shadow: 2px 2px 4px darkgreen, 
+                 -2px -2px 4px white, 
+                 2px -2px 4px darkgreen, 
+                 -2px 2px 4px white;
+}
+	</style>
+</head>
+<body>
+    <h1>The Wood Between the Worlds</h1>
+     <!-- Start screen -->
+    <div id="start" class="gameDiv">
+        <p>You wake up and realize you are lying on soft, spongy, vibrant, green grass. The air is still and there is no sound either from man or beast.<br>
+	You have no memory of ever having been in this place before and it is all really quite strange.
+	At the same time, it is so peaceful and quiet that you feel as if you could go on sleeping for hours. </p>
+        <button onclick="makeDecision('LookAround')">Look Around</button>
+        <button onclick="makeDecision('GoBackToSleep')">Go Back to Sleep</button>
+    </div>
+    
+    <!-- Look Around -->
+    <div id="LookAround" class="gameDiv">
+        <p>You squint your eyes and look around you. You are met by a beautiful scene.<br>
+Before you, not but a few feet away, is a pool of water. The type where the water seems perfectly clear, yet goes to an unfathomable depth. </p>
+        <button onclick="makeDecision('KeepLooking')">Keep Looking</button>
+        <button onclick="makeDecision('NotInterested')">Not Interested</button>
+    </div>
+    
+    <!-- Go Back to Sleep -->
+    <div id="GoBackToSleep" class="gameDiv">
+        <p>You go back to sleep and never wake up. The end.</p>
+        <button onclick="resetGame()">Start Over</button>
+    </div>
+    
+    <!-- Keep Looking -->
+    <div id="KeepLooking" class="gameDiv">
+        <p>As your eyes grow accustomed to the light, which is really a bit dim, you continue to look around. <br>
+	You look past the pool that is in front of you to the opposite side and see that the pool is in the midst of sparsely populated pines. <br>
+	You are now fully awake (or at least as awake as you can be in this place) and are beginning to take a real interest in your surroundings. </p>
+        <button onclick="makeDecision('StandUp')">Stand Up</button>
+	<button onclick="makeDecision('KeepLyingDown')">Keep Lying Down</button>
+    </div>
+    
+    <!-- Not Interested -->
+    <div id="NotInterested" class="gameDiv">
+        <p>You close your eyes and lay there for an eternity. For that is the sort of thing that happens in this place. <br>
+	It is impossible to keep track of time. Perhaps there is no such thing as time in this strange wood.</p>
+        <button onclick="resetGame()">Start Over</button>
+    </div>
+
+    <!-- Stand Up -->
+    <div id="StandUp" class="gameDiv">
+        <p>You stand up and stretch for a long time. Suddenly, you are struck with a terrible realization.
+	You haven't the slightest idea where you are.</p>
+        <button onclick="makeDecision('FindAWayOut')">Find A Way Out</button>
+	<button onclick="makeDecision('GoForASwim')">Go For A Swim</button>
+    </div>
+
+    <div id="KeepLyingDown" class="gameDiv">
+        <p>You continue to lie there and look around at the peaceful scenery until you grow old. Once you stop to rest in this strange land,
+	you will never be able to make yourself do anything else.</p>
+        <button onclick="resetGame('')">Start Over</button>
+    </div>
+
+    <!-- Find A Way Out -->
+    <div id="FindAWayOut" class="gameDiv">
+        <p>You make up your mind that since you have no clue which direction you came in from,
+	you should just pick a direction and stick to it. Surely you will come out of the forest at some point.
+	Although at this moment the forest feels as if it stretches on endlessy in every direction. </p>
+        <button onclick="makeDecision('North')">North</button>
+	<button onclick="makeDecision('East')">East</button>
+        <button onclick="makeDecision('South')">South</button>
+	<button onclick="makeDecision('West')">West</button>
+    </div>
+
+    <!-- North -->
+    <div id="North" class="gameDiv">
+        <p>You walk past the pool and out of the little clearing which has served as your resting spot and head into the trees.
+	The forest feels much denser than it looks. The air is stuffy and old. You walk for a few minutes and have passed several
+	other pools and clearings that look identical to the one you woke up in. The stuffy air is starting to get to you and you 
+	begin to feel nauseous.</p>
+        <button onclick="makeDecision('GoBackToThePool')"> Go Back to the Pool</button>
+	<button onclick="makeDecision('KeepGoing')">Keep Going</button>
+    </div>
+
+    <!-- South -->
+    <div id="South" class="gameDiv">
+        <p>You turn with your back to the pool and begin to head away from the little clearing in the woods.
+	You try to keep calm as you advance further into the unknown, but your head is swimming with the fear of being lost
+	in the wood forever.</p>
+        <button onclick="makeDecision('GoBackToThePool')">Go Back to the Pool</button>
+	<button onclick="makeDecision('KeepWalking')">Keep Walking</button>
+    </div>
+
+    <!-- East -->
+    <div id="East" class="gameDiv">
+        <p>You head out of the clearing and walk for what feels like foreverer until you see a little boy and girl fighting with an 
+	extremely tall woman dressed in royal garments. The air is so heavy that you can see them before you can hear them. The woman is pale and struggling to breathe but she
+	still has a strong grip on the kids and won't let go. All they can do is drag her along with them</p>
+        <button onclick="makeDecision('HelpTheKids')">Help the Kids</button>
+	<button onclick="makeDecision('StandBackAndWatch')">Stand Back and Watch</button>
+    </div>
+
+    <!-- West -->
+    <div id="West" class="gameDiv">
+        <p>You turn and start to walk but you trip and hit your head on a tree trunk. You wake up a while later and don't remember where you are.</p>
+        <button onclick="makeDecision('LookAround')">Look Around</button>
+        <button onclick="makeDecision('GoBackToSleep')">Go Back to Sleep</button>
+    </div>
+
+    <!-- Go Back to the Pool -->
+    <div id="GoBackToThePool" class="gameDiv">
+        <p>You turn around to go back to the pool but then you realize that it could be any number of pools.
+	Now you are not even certain which direction you had been heading to start with. The wood looks
+	the same in every direction. It's possible that you have been walking in circles the whole time. Then,
+	as fate would have it, you see a young boy and girl fighting with an extremely tall woman in royal clothes.</p>
+        <button onclick="makeDecision('HelpTheKids')">Help the Kids</button>
+	<button onclick="makeDecision('StandBackAndWatch')">Stand Back and Watch</button>
+    </div>
+
+    <!-- Keep Going -->
+    <div id="KeepGoing" class="gameDiv">
+        <p>You walk miles on end through the unchanging landscape. Never a hill or a clearing besides the intermittent pools.
+	Eventually you lie down to rest near one of the pools in the soft grass and you fall into a perpetual slumber.</p>
+        <button onclick="resetGame()">Start Over</button>
+    </div>
+
+    <!-- Keep Walking -->
+    <div id="KeepWalking" class="gameDiv">
+        <p>You put on as brave a face as you can and take step after step until eventually you cross over a shallow stream and come to the edge of a dizzyingly high cliff.
+	The stream is barely flowing over the edge of the cliff, but the height from which it falls results in a sound that would cause anyone to believe there was a 
+	great waterfall nearby.<br>
+	It is obvious you can go no further in this direction so you turn around, only to be greeted by the sight of a lion watering at the stream.
+	Or at least, it has the shape of a lion, but it is far larger than any lion you have ever seen. Aslan, for that is the lion's name, lets out a great roar<br>
+        and you are carried over the edge of the cliff. You fall for what feels like hours (remember you cannot really keep track of time here).</p>
+        <button onclick="resetGame('')"> Sorry, I haven't finished this path of the story yet. Start Over</button>
+
+    </div>
+
+    <!-- Help the Kids -->
+    <div id="HelpTheKids" class="gameDiv">
+        <p>You run up and pull the lady off the kids but not without a smack across the face from the tall lady. Just when the kids got free, they stepped into a nearby pond.
+	To your astonishment, they immediatley disappeared beneath the surface. "Do they not know how to swim?" you wonder.</p>
+        <button onclick="makeDecision('JumpInToSaveThem')">Jump in After Them</button>
+	<button onclick="makeDecision('StayWithTheLady')">Stay with the Lady</button>
+    </div>
+
+    <!-- Stand Back and Watch -->
+    <div id="StandBackAndWatch" class="gameDiv">
+        <p>The kids jump into a pool with the lady still holding on to them and all three of them disappear beneath the surface.
+	You wait for some time assuming they will come back up but they never do.</p>
+        <button onclick="makeDecision('ContinueWalking')">Continue Walking</button>
+	<button onclick="makeDecision('JumpInAfterThem')">Jump In After Them</button>
+    </div>
+
+    <!-- Jump in to Save Them -->
+    <div id="JumpInToSaveThem" class="gameDiv">
+        <p>You jump in after the kids in an attempt to save them from drowning. But you don't get wet. Well, at least you only get wet to your ankles.
+	As you look around in confusion, you realize that you are standing in a puddle of rain water outside your very own apartment. Was it all a dream?
+	Were you sleep walking and stepping in the puddle woke you up? It all felt so real. Reality or dream, your memory of that strange experience in the Wood Between the Worlds
+	will stick with you forever.</p>
+        <button onclick="resetGame('')">Start Over</button>
+    </div>
+
+    <!-- Stay with the Lady -->
+    <div id="StayWithTheLady" class="gameDiv">
+        <p>You decide that you probably wouldn't be able to help the kids at this point. They are now out of your reach.
+	The best thing you can think to do is stay with the tall lady. Maybe you can at least get some answers as to where you both are.
+	You turn to face her and see that she is steaming with anger. "Those kids were my only way out of this dreadful place, and you ruined my chance to go with them," she fumes as she stands up
+	menacingly.</p>
+        <button onclick="makeDecision('TryToFightHer')">Try to Fight Her</button>
+	<button onclick="makeDecision('JumpInThePool')">Jump in the Pool</button>
+    </div>
+
+    <!-- Try to Fight Her -->
+    <div id="TryToFightHer" class="gameDiv">
+        <p>You get in your stance and are ready for a tough battle. You might have the edge on her in strength,
+	But she towers over you. Then, she mutters a few indistinguishable words in a deplorable language. All of a sudden you can't move your legs. The paralysis spreads
+	upwards through your body until you are unable to move. You have been turned to stone. Other visitors to this Wood Between the Worlds will look at you and wonder how
+	this large stone statue came to be in the middle of this seemingly unpopulated wood. </p>
+        <button onclick="resetGame('')">Start Over</button>
+    </div>
+
+    <!-- Jump in the Pool -->
+    <div id="JumpInThePool" class="gameDiv">
+        <p>You leap into the pool just as she reaches to grab hold of your arm. Your head starts to spin as the wood blurs. Something else starts
+	to come into focus. It's the back of a coat. Now your memory of recent events comes flooding back, you were playing hide and seek before all of this. You must be hiding in a closet.
+	But it's been hours, surely you have won the game by now. You step out of the closet to claim your victory but you spot the seeker still standing in the corner counting. It is as if
+	no time has passed at all. What a strange place that Wood Between the Worlds is.</p>
+        <button onclick="resetGame('')">Start Over</button>
+    </div>
+
+    <!-- Go For A Swim -->
+    <div id="GoForASwim" class="gameDiv">
+	<p>You decide that you are not in a hurry though and the water looks rather calm and pleasant.
+	A quick dip in the pool couldn't hurt and maybe it would wake you up a little more. As soon as your foot hits the water,
+	you start to fall. There is nothing to put your foot on, this pool must have sheer faces rather than a gradual slope to the middle.
+	But then you realize that you aren't getting wet at all, and you are falling...upwards? Indeed you may not even be able to call it falling.
+	You are travelling upwards through the air at a rapid pace with absolutely no clue what end is awaiting you. After some time, you realize you have stopped moving but that it is pitch black.</p>
+	<button onclick="makeDecision('StayPut')">Stay Put</button>
+	<button onclick="makeDecision('MoveAround')">Move Around</button>
+    </div>
+
+    <!-- Continue Walking -->
+    <div id="ContinueWalking" class="gameDiv">
+	<p>Their mysterious disappearance puzzles you as you continue on your walk. You walk on and on through the forest and never meet another living thing. <br>
+	You die of exhaustion, alone in the Wood Between the Worlds.</p>
+        <button onclick="resetGame('')">Start Over</button>
+    </div>
+
+    <!-- Jump In After Them -->
+    <div id="JumpInAfterThem" class="gameDiv">
+	<p>You are concerened that they may have drowned so you dive into the pool. 
+	You are expecting to feel the rush of water as your body is submerged underneath the surface;
+	but instead, you find yourself standing in the middle of a busy London Street. It seems you have come to the end of
+	your strange journey. But will you ever get answers as to what really happened? What was that strange Wood Between the Worlds?</p>
+        <button onclick="resetGame('')">Start Over</button>
+    </div>
+</body>
+<script>
+// Function to handle the decision-making process
+function makeDecision(decision) {
+    // Hide all game divs
+    const allDivs = document.querySelectorAll('.gameDiv');
+    allDivs.forEach(div => div.style.display = 'none');
+    
+    // Show the div related to the current decision
+    const currentDiv = document.getElementById(decision);
+    if (currentDiv) {
+        currentDiv.style.display = 'block';
+    }
+}
+
+// Function to reset the game (show the start screen again)
+function resetGame() {
+    // Hide all game divs
+    const allDivs = document.querySelectorAll('.gameDiv');
+    allDivs.forEach(div => div.style.display = 'none');
+    
+    // Show the start div
+    const startDiv = document.getElementById('start');
+    startDiv.style.display = 'block';
+}
+
+// Initially show the start screen
+document.getElementById('start').style.display = 'block';
+</script>
+</html>
