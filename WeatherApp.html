@@ -189,13 +189,26 @@ fetch("https://api.ipgeolocation.io/ipgeo?apiKey=f9d589d85843480db71fafe41c35f36
     const longitude = data.longitude;
     
     // Now fetch the weather for that location
-    fetchWeather(latitude, longitude);
+    fetchWeatherByCoords(latitude, longitude);
   })
   .catch((error) => {
     console.error('Error fetching location data:', error);
     alert("Error fetching location. Please try again.");
   });
         }
+function fetchWeatherByCoords(latitude, longitude) {
+    const url = `${apiUrl}?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            // Display weather data here
+            console.log(data);
+        })
+        .catch(error => {
+            console.error('Error fetching weather data:', error);
+        });
+}
         // Fetch the user's location and show the weather for that location on page load
         window.onload = getUserLocation();
     </script>
