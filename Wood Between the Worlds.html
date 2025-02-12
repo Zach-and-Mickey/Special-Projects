@@ -149,8 +149,8 @@ Before you, not but a few feet away, is a pool of water. The type where the wate
     <!-- East -->
     <div id="East" class="gameDiv">
         <p>You head out of the clearing and walk for what feels like foreverer until you see a little boy and girl fighting with an 
-	extremely tall woman dressed in royal garments. The air is so heavy that you can see them before you can hear them. The woman is pale and struggling to breathe but she
-	still has a strong grip on the kids and won't let go. All they can do is drag her along with them</p>
+	extremely tall woman dressed in royal garments. The woman is pale and struggling to breathe but she
+	still has a strong grip on the kids and won't let go. All they can do is drag her along with them.</p>
         <button onclick="makeDecision('HelpTheKids')">Help the Kids</button>
 	<button onclick="makeDecision('StandBackAndWatch')">Stand Back and Watch</button>
     </div>
@@ -183,7 +183,21 @@ Before you, not but a few feet away, is a pool of water. The type where the wate
     <div id="KeepWalking" class="gameDiv">
         <p>You put on as brave a face as you can and take step after step until eventually you cross over a shallow stream and come to the edge of a dizzyingly high cliff.
 	The stream is barely flowing over the edge of the cliff, but the height from which it falls results in a sound that would cause anyone to believe there was a 
-	great waterfall nearby.<br>
+	great waterfall nearby.</p>
+		<button onclick="makeDecision("JumpOff")">Jump Off the Cliff</button>
+		<button onclick="makeDecision("TurnAround")">Turn Around and Head Back</button>
+    </div>
+
+<!-- Jump Off -->
+	<div id="JumpOff" class='gameDiv'>
+		<p>At this point, you figure your only options are to continue wandering aimlessly through the woods or jump. You take a leap of faith off the cliff and, as expected,
+		you start to fall. You fall for quite some time before you realize that you are not really falling down, but out. The stream is now barely visible against the cliff face.</p>
+        <button onclick="resetGame('')"> Sorry, I haven't finished this path of the story yet. Start Over</button>
+
+    </div>
+
+    <!-- Turn Around and Head Back -->
+	<div id="TurnAround" class='gameDiv'>
 	It is obvious you can go no further in this direction so you turn around, only to be greeted by the sight of a lion watering at the stream.
 	Or at least, it has the shape of a lion, but it is far larger than any lion you have ever seen. Aslan, for that is the lion's name, lets out a great roar<br>
         and you are carried over the edge of the cliff. You fall for what feels like hours (remember you cannot really keep track of time here).</p>
@@ -264,7 +278,7 @@ Before you, not but a few feet away, is a pool of water. The type where the wate
 
     <!-- Jump In After Them -->
     <div id="JumpInAfterThem" class="gameDiv">
-	<p>You are concerened that they may have drowned so you dive into the pool. 
+	<p>You are concerened that they may be drowning so you dive into the pool. 
 	You are expecting to feel the rush of water as your body is submerged underneath the surface;
 	but instead, you find yourself standing in the middle of a busy London Street. It seems you have come to the end of
 	your strange journey. But will you ever get answers as to what really happened? What was that strange Wood Between the Worlds?</p>
