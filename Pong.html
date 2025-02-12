@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: rgb(255,200,160);
+        }
+        canvas {
+            border: 2px solid #fff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pong" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById("pong");
+        const ctx = canvas.getContext("2d");
+
+        // Ball settings
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        const ballRadius = 10;
+        let ballSpeedX = 5;
+        let ballSpeedY = 5;
+
+        // Paddle settings
+        const paddleWidth = 10;
+        const paddleHeight = 100;
+        let player1Y = canvas.height / 2 - paddleHeight / 2;
+        let player2Y = canvas.height / 2 - paddleHeight / 2;
+        let paddleSpeed = 5;
+        let player1Dy = 0;  // Player paddle movement delta
+	let player2Dy = 0;  
+        const leftPaddleX = 0;
+        const rightPaddleX = canvas.width - paddleWidth;
+
+        // Key event listeners
+        document.addEventListener('keydown', (event) => {
+            if (event.key === "ArrowUp") player2Dy = -paddleSpeed;
+            else if (event.key === "ArrowDown") player2Dy = paddleSpeed;
+            else if (event.key === "w") player1Dy = -paddleSpeed;
+            else if (event.key === "s") player1Dy = paddleSpeed;
+        });
+
+	document.addEventListener('keyup', (event) => {
+    	    if (event.key === "ArrowUp" || event.key === "ArrowDown") player2Dy = 0;
+            else if (event.key === "w" || event.key === "s") player1Dy = 0;
+	});
+
+
+        // Desired frame rate (target FPS)
+        const desiredFPS = 120;
+        const interval = 1000 / desiredFPS; // Time between updates in ms
+        let deltaTime = 0;  // Time difference between frames
+
+        // Update game logic (movement, collision detection)
+        function update(dt) {
+            deltaTime += dt;
+
+            if (deltaTime > interval) {
+                // Update game logic every 'interval' ms
+                // Move the player1 paddle
+                player1Y += player1Dy;
+                if (player1Y < 0) player1Y = 0;
+                if (player1Y + paddleHeight > canvas.height) player1Y = canvas.height - paddleHeight;
+
+                // Move the player2 paddle
+                player2Y += player2Dy;
+                if (player2Y < 0) player2Y = 0;
+                if (player2Y + paddleHeight > canvas.height) player2Y = canvas.height - paddleHeight;
+		
+
+                // Ball movement
+                ballX += ballSpeedX;
+                ballY += ballSpeedY;
+
+                // Ball collision with walls (top and bottom)
+                if (ballY - ballRadius < 0 || ballY + ballRadius > canvas.height) {
+                    ballSpeedY = -ballSpeedY;
+                }
+
+                // Ball collision with paddles
+                if (ballX - ballRadius < leftPaddleX + paddleWidth && ballY > player1Y && ballY < player1Y + paddleHeight && paddleSpeed<20) {
+                    ballSpeedX = -ballSpeedX+.5;
+	 	    paddleSpeed +=.5;
+		    console.log(ballSpeedX);
+                }
+                else if (ballX - ballRadius < leftPaddleX + paddleWidth && ballY > player1Y && ballY < player1Y + paddleHeight) {
+                    ballSpeedX = -ballSpeedX;
+		    console.log(ballSpeedX);
+                }
+                if (ballX + ballRadius > rightPaddleX && ballY > player2Y && ballY < player2Y + paddleHeight && paddleSpeed<20)  {
+                    ballSpeedX = -ballSpeedX-.5;
+	 	    paddleSpeed +=.5;
+		    console.log(ballSpeedX);
+                }
+                else if (ballX + ballRadius > rightPaddleX && ballY > player2Y && ballY < player2Y + paddleHeight)  {
+                    ballSpeedX = -ballSpeedX;
+		    console.log(ballSpeedX);
+                }
+
+                // Ball reset when out of bounds
+                if (ballX - ballRadius < 0 || ballX + ballRadius > canvas.width) {
+                    ballX = canvas.width / 2;
+                    ballY = canvas.height / 2;
+                    ballSpeedX = 5;
+	 	    paddleSpeed =5;
+                }
+
+                // Reset deltaTime after the update
+                deltaTime = 0;
+            }
+        }
+
+        // Render game (draw everything)
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw paddles and ball
+            ctx.fillStyle = "seagreen";
+            ctx.fillRect(leftPaddleX, player1Y, paddleWidth, paddleHeight); // Player1 paddle
+            ctx.fillRect(rightPaddleX, player2Y, paddleWidth, paddleHeight); // Player2 paddle
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);  // Ball
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Game loop (using requestAnimationFrame)
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            const delta = timestamp - lastTime;
+            lastTime = timestamp;
+
+            update(delta);  // Pass delta time to the update function
+            render();        // Render the frame
+
+            requestAnimationFrame(gameLoop);  // Keep looping
+        }
+
+        // Start the game loop
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
