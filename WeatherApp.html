@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather App</title>
     <style>
+        html, body {
+            height: 100%; /* Make sure both html and body elements take up the full height */
+            margin: 0; /* Remove default margin */
+        }
         body {
             background-image: url("Clear.jpg");
             background-size: cover;
@@ -13,6 +17,7 @@
             image-rendering: pixelated;
             transition: background-image 3s ease-in-out;
             font-family: Arial, sans-serif;
+            display:flex;
         }
         .container {
             background-color: rgba(255, 255, 255, 0.75);
@@ -24,6 +29,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             text-align: center;
             font-size: 1.2em;
+            position: relative;
         }
         h1, h2, h3 {
             color: #333;
@@ -173,7 +179,8 @@
             document.body.style.backgroundImage = "url('Snow.jpg')";
         }
     }
-
+let latitude;
+let longitude;
     function getUserLocation() {
         const requestOptions = {
             method: "GET",
@@ -192,9 +199,17 @@
                 alert("Error fetching location. Please try again.");
             });
     }
-
+locationButton.addEventListener('click', () => {
+    if (latitude && longitude) {
+        // Clear previous weather data before fetching new data
+        clearWeatherData();
+        fetchWeatherByCoords(latitude, longitude);  // Fetch weather based on coordinates
+    } else {
+        alert("Unable to get location. Please try again later.");
+    }
+});
     // Fetch user's location and show the weather for that location on page load
-    window.onload = getUserLocation;
+    window.onload = getUserLocation();
 
     function clearWeatherData() {
         locationElement.textContent = '';
