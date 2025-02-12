@@ -40,14 +40,18 @@
         h3 {
             margin: 2vh;
         }
+        .weather-info {
+            display: none;
+        {
         p {
-            font-size: clamp(8px,2vw,20px);
+            font-size: clamp(14px,2vw,20px);
         }
         input {
             padding: 10px;
             font-size: 1em;
             width: 70%;
             margin: 10px 0;
+            width: clamp(100px,50%,500px);
         }
         button {
             padding: 10px 20px;
@@ -83,151 +87,200 @@
     </div>
 
     <script>
-    const apiKey = '34d38878aa95ce19e71e8d7f39755a25';
-    const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';
+        // API configuration
+        const apiKey = '34d38878aa95ce19e71e8d7f39755a25';
+        const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';
 
-    const locationInput = document.getElementById('locationInput');
-    const searchButton = document.getElementById('searchButton');
-    const locationElement = document.getElementById('location');
-    const temperatureElement = document.getElementById('temperature');
-    const descriptionElement = document.getElementById('description');
-    const humidity = document.getElementById('humidity');
-    const sunrise = document.getElementById('sunrise');
-    const sunset = document.getElementById('sunset');
+        // DOM elements
+        const locationInput = document.getElementById('locationInput');
+        const searchButton = document.getElementById('searchButton');
+        const locationElement = document.getElementById('location');
+        const temperatureElement = document.getElementById('temperature');
+        const descriptionElement = document.getElementById('description');
+        const humidity = document.getElementById('humidity');
+        const sunrise = document.getElementById('sunrise');
+        const sunset = document.getElementById('sunset');
+        const weatherInfo = document.querySelector('.weather-info');
 
-    searchButton.addEventListener('click', () => {
-        const location = locationInput.value;
-        if (location) {
-            clearWeatherData();
-            fetchWeather(location);  // Fetch weather based on city name
+        // Event listener for the search button
+        searchButton.addEventListener('click', () => {
+            const location = locationInput.value;
+            if (location) {
+                // Clear previous weather data before fetching new data
+                clearWeatherData();
+                fetchWeather(location);  // Fetch weather based on the city name
+            }
+        });
+
+        // Event listener for the "Use My Location" button
+        locationButton.addEventListener('click', () => {
+            const location = locationInput.value;
+            if (location) {
+                // Clear previous weather data before fetching new data
+                clearWeatherData();
+                fetchWeatherByCoords(latitude, longitude);  // Fetch weather based on coords
+            }
+        });
+
+        // Fetch weather data function for city
+        function fetchWeather(location) {
+            const url = `${apiUrl}?q=${location}&appid=${apiKey}&units=imperial`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.cod !== 200) {
+                        locationElement.textContent = "City not found. Please try again.";
+                        return;
+                    }
+
+                    // Use a slight delay before updating the city name and weather
+                    setTimeout(() => {
+                        // Display weather data
+                        locationElement.textContent = data.name;
+                        temperatureElement.textContent = `Current Temperature: ${Math.round(data.main.temp)} °F`;
+
+                        // Weather description (capitalized)
+                        const weatherDescription = data.weather[0].description;
+                        const capitalizedDescription = weatherDescription.split(' ').map(word => {
+                            return word.charAt(0).toUpperCase() + word.slice(1);
+                        }).join(' ');
+                        descriptionElement.textContent = capitalizedDescription;
+
+                        humidity.textContent = data.main.humidity ? `Humidity: ${data.main.humidity}%` : "Humidity: Data not available";
+
+                        // Format sunrise and sunset times
+                        const sunriseTime = formatTime(data.sys.sunrise);
+                        const sunsetTime = formatTime(data.sys.sunset);
+                        sunrise.textContent = `Sunrise: ${sunriseTime}`;
+                        sunset.textContent = `Sunset: ${sunsetTime}`;
+
+                        // Show the weather info
+                        weatherInfo.style.display = 'block'; // Show the weather info
+
+                        // Change background image based on weather conditions
+                        updateBackground(weatherDescription);
+                    }, 500); // Add a delay of 500ms (adjust as needed)
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
+                    locationElement.textContent = "Error fetching data. Please try again later.";
+                });
         }
-    });
 
-    function fetchWeather(location) {
-        const url = `${apiUrl}?q=${location}&appid=${apiKey}&units=imperial`;
-
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data.cod !== 200) {
-                    locationElement.textContent = "City not found. Please try again.";
-                    return;
-                }
-
-                displayWeather(data);
-            })
-            .catch(error => {
-                console.error('Error fetching weather data:', error);
-                locationElement.textContent = "Error fetching data. Please try again later.";
-            });
-    }
-
-    function fetchWeatherByCoords(latitude, longitude) {
-        const userurl = `${apiUrl}?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
-
-        fetch(userurl)
-            .then(response => response.json())
-            .then(data => {
-                if (data.cod !== 200) {
-                    locationElement.textContent = "City not found. Please try again.";
-                    return;
-                }
-
-                displayWeather(data);
-            })
-            .catch(error => {
-                console.error('Error fetching weather data:', error);
-                locationElement.textContent = "Error fetching data. Please try again later.";
-            });
-    }
-
-    function displayWeather(data) {
-        const cityName = `${data.name}${data.sys.state ? ', ' + data.sys.state : ''}, ${data.sys.country}`;
-        locationElement.textContent = cityName;
-        temperatureElement.textContent = `Current Temperature: ${Math.round(data.main.temp)} °F`;
-
-        const weatherDescription = data.weather[0].description;
-        const capitalizedDescription = weatherDescription.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-        descriptionElement.textContent = capitalizedDescription;
-
-        humidity.textContent = data.main.humidity ? `Humidity: ${data.main.humidity}%` : "Humidity: Data not available";
-
-        const sunriseTime = formatTime(data.sys.sunrise);
-        const sunsetTime = formatTime(data.sys.sunset);
-        sunrise.textContent = `Sunrise: ${sunriseTime}`;
-        sunset.textContent = `Sunset: ${sunsetTime}`;
-
-        updateBackground(weatherDescription);
-    }
-
-    function formatTime(timestamp) {
-        const time = new Date(timestamp * 1000);
-        let hours = time.getHours();
-        let minutes = time.getMinutes();
-        const period = hours >= 12 ? "PM" : "AM";
-
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        minutes = minutes < 10 ? `0${minutes}` : minutes;
-
-        return `${hours}:${minutes} ${period}`;
-    }
-
-    function updateBackground(weatherDescription) {
-        if (weatherDescription.includes("clouds")) {
-            document.body.style.backgroundImage = "url('Clouds.jpg')";
-        } else if (weatherDescription.includes("clear sky")) {
-            document.body.style.backgroundImage = "url('Clear.jpg')";
-        } else if (weatherDescription.includes("storm")) {
-            document.body.style.backgroundImage = "url('Storm.jpg')";
-        } else if (weatherDescription.includes("rain") || weatherDescription.includes("drizzle")) {
-            document.body.style.backgroundImage = "url('Rain.jpg')";
-        } else if (weatherDescription.includes("fog") || weatherDescription.includes("mist")) {
-            document.body.style.backgroundImage = "url('Fog.jpg')";
-        } else if (weatherDescription.includes("snow")) {
-            document.body.style.backgroundImage = "url('Snow.jpg')";
+        // Function to clear previous weather data
+        function clearWeatherData() {
+            locationElement.textContent = '';
+            temperatureElement.textContent = '';
+            descriptionElement.textContent = '';
+            humidity.textContent = '';
+            sunrise.textContent = '';
+            sunset.textContent = '';
+            weatherInfo.style.display = 'none'; // Hide the weather info initially
         }
-    }
-let latitude;
-let longitude;
-    function getUserLocation() {
-        const requestOptions = {
-            method: "GET",
-            redirect: "follow"
+
+        // Convert timestamp to 12-hour format
+        function formatTime(timestamp) {
+            const time = new Date(timestamp * 1000);
+            let hours = time.getHours();
+            let minutes = time.getMinutes();
+            let seconds = time.getSeconds();
+            const period = hours >= 12 ? "PM" : "AM";
+            
+            // Convert to 12-hour format
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 12-hour format uses 12 instead of 0
+            minutes = minutes < 10 ? `0${minutes}` : minutes;
+            seconds = seconds < 10 ? `0${seconds}` : seconds;
+            
+            return `${hours}:${minutes}:${seconds} ${period}`;
+        }
+
+        // Change the background image based on the weather condition
+        function updateBackground(weatherDescription) {
+            if (weatherDescription.includes("clouds")) {
+                document.body.style.backgroundImage = "url('Clouds.jpg')";
+            } else if (weatherDescription.includes("clear sky")) {
+                document.body.style.backgroundImage = "url('Clear.jpg')";
+            } else if (weatherDescription.includes("storm")) {
+                document.body.style.backgroundImage = "url('Storm.jpg')";
+            } else if (weatherDescription.includes("rain") || weatherDescription.includes("drizzle")) {
+                document.body.style.backgroundImage = "url('Rain.jpg')";
+            } else if (weatherDescription.includes("fog") || weatherDescription.includes("mist")) {
+                document.body.style.backgroundImage = "url('Fog.jpg')";
+            } else if (weatherDescription.includes("snow")) {
+                document.body.style.backgroundImage = "url('Snow.jpg')";
+            }
+        }
+
+        // Fetch the user's location and show the weather for that location on page load
+        window.onload = function() {
+            clearWeatherData();  // Hide weather info on page load
+            getUserLocation();   // Fetch user location on load
         };
 
-        fetch("https://api.ipgeolocation.io/ipgeo?apiKey=f9d589d85843480db71fafe41c35f360", requestOptions)
-            .then((response) => response.json())
-            .then((data) => {
-                const latitude = data.latitude;
-                const longitude = data.longitude;
-                fetchWeatherByCoords(latitude, longitude);
-            })
-            .catch((error) => {
-                console.error('Error fetching location data:', error);
-                alert("Error fetching location. Please try again.");
-            });
-    }
-locationButton.addEventListener('click', () => {
-    if (latitude && longitude) {
-        // Clear previous weather data before fetching new data
-        clearWeatherData();
-        fetchWeatherByCoords(latitude, longitude);  // Fetch weather based on coordinates
-    } else {
-        alert("Unable to get location. Please try again later.");
-    }
-});
-    // Fetch user's location and show the weather for that location on page load
-    window.onload = getUserLocation();
+        // Get user's location based on IP
+        function getUserLocation() {
+            const requestOptions = {
+                method: "GET",
+                redirect: "follow"
+            };
 
-    function clearWeatherData() {
-        locationElement.textContent = '';
-        temperatureElement.textContent = '';
-        descriptionElement.textContent = '';
-        humidity.textContent = '';
-        sunrise.textContent = '';
-        sunset.textContent = '';
-    }
+            fetch("https://api.ipgeolocation.io/ipgeo?apiKey=f9d589d85843480db71fafe41c35f360", requestOptions)
+                .then((response) => response.json())
+                .then((data) => {
+                    const latitude = data.latitude;
+                    const longitude = data.longitude;
+                    
+                    // Now fetch the weather for that location
+                    fetchWeatherByCoords(latitude, longitude);
+                })
+                .catch((error) => {
+                    console.error('Error fetching location data:', error);
+                    alert("Error fetching location. Please try again.");
+                });
+        }
+
+        // Fetch weather by coordinates
+        function fetchWeatherByCoords(latitude, longitude) {
+            const userurl = `${apiUrl}?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
+
+            fetch(userurl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.cod !== 200) {
+                        locationElement.textContent = "City not found. Please try again.";
+                        return;
+                    }
+
+                    // Use a slight delay before updating the city name and weather
+                    setTimeout(() => {
+                        // Display weather data
+                        locationElement.textContent = data.name;
+                        temperatureElement.textContent = `Current Temperature: ${Math.round(data.main.temp)} °F`;
+
+                        const weatherDescription = data.weather[0].description;
+                        const capitalizedDescription = weatherDescription.split(' ').map(word => {
+                            return word.charAt(0).toUpperCase() + word.slice(1);
+                        }).join(' ');
+                        descriptionElement.textContent = capitalizedDescription;
+
+                        humidity.textContent = data.main.humidity ? `Humidity: ${data.main.humidity}%` : "Humidity: Data not available";
+
+                        const sunriseTime = formatTime(data.sys.sunrise);
+                        const sunsetTime = formatTime(data.sys.sunset);
+                        sunrise.textContent = `Sunrise: ${sunriseTime}`;
+                        sunset.textContent = `Sunset: ${sunsetTime}`;
+
+                        weatherInfo.style.display = 'block'; // Show the weather info
+                        updateBackground(weatherDescription);
+                    }, 500); // Add a delay of 500ms
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
+                    locationElement.textContent = "Error fetching data. Please try again later.";
+                });
+        }
     </script>
 </body>
 </html>
