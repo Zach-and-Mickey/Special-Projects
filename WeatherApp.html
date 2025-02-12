@@ -54,6 +54,7 @@
         <h1>Weather App</h1>
         <input type="text" id="locationInput" placeholder="Enter a city">
         <button id="searchButton" onclick="fetchWeather()">Search</button>
+        <button id="location" onclick="fetchWeatherByCoords()">Use My Location</button>
         <div class="weather-info">
             <h2 id="location"></h2>
             <p id="temperature"></p>
@@ -197,18 +198,56 @@ fetch("https://api.ipgeolocation.io/ipgeo?apiKey=f9d589d85843480db71fafe41c35f36
   });
         }
 function fetchWeatherByCoords(latitude, longitude) {
-    const url = `${apiUrl}?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
+    const userurl = `${apiUrl}?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            // Display weather data here
-            console.log(data);
-        })
-        .catch(error => {
-            console.error('Error fetching weather data:', error);
-        });
-}
+      fetch(userurl)
+                .then(response => response.json())
+                .then(data => {
+                    // Check if the city exists in the response
+                    if (data.cod !== 200) {
+                        locationElement.textContent = "City not found. Please try again.";
+                        temperatureElement.textContent = "";
+                        descriptionElement.textContent = "";
+                        humidity.textContent = "";
+                        sunrise.textContent = "";
+                        sunset.textContent = "";
+                        return;
+                    }
+
+                    // Display weather data
+                    locationElement.textContent = data.name;
+                    temperatureElement.textContent = `Current Temperature: ${Math.round(data.main.temp)} °F`;
+
+                    // Weather description (capitalized)
+                    const weatherDescription = data.weather[0].description;
+                    const capitalizedDescription = weatherDescription.split(' ').map(word => {
+                        return word.charAt(0).toUpperCase() + word.slice(1);
+                    }).join(' ');
+                    descriptionElement.textContent = capitalizedDescription;
+
+                    humidity.textContent = data.main.humidity ? `Humidity: ${data.main.humidity}%` : "Humidity: Data not available";
+
+                    // Format sunrise and sunset times
+                    const sunriseTime = formatTime(data.sys.sunrise);
+                    const sunsetTime = formatTime(data.sys.sunset);
+                    sunrise.textContent = `Sunrise: ${sunriseTime}`;
+                    sunset.textContent = `Sunset: ${sunsetTime}`;
+
+                    // Change background image based on weather conditions
+                    updateBackground(weatherDescription);
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
+                    locationElement.textContent = "Error fetching data. Please try again later.";
+                    temperatureElement.textContent = "";
+                    descriptionElement.textContent = "";
+                    minTemp.textContent = "";
+                    maxTemp.textContent = "";
+                    humidity.textContent = "";
+                    sunrise.textContent = "";
+                    sunset.textContent = "";
+                });
+        }
         // Fetch the user's location and show the weather for that location on page load
         window.onload = getUserLocation();
     </script>
