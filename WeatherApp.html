@@ -54,7 +54,7 @@
         <h1>Weather App</h1>
         <input type="text" id="locationInput" placeholder="Enter a city">
         <button id="searchButton" onclick="fetchWeather()">Search</button>
-        <button id="location" onclick="fetchWeatherByCoords()">Use My Location</button>
+        <button id="locationButton" onclick="fetchWeatherByCoords()">Use My Location</button>
         <div class="weather-info">
             <h2 id="location"></h2>
             <p id="temperature"></p>
@@ -89,6 +89,14 @@
             // Clear previous weather data before fetching new data
             clearWeatherData();
             fetchWeather(location);  // Fetch weather based on the city name
+        }
+    });
+         locationButton.addEventListener('click', () => {
+        const location = locationInput.value;
+        if (location) {
+            // Clear previous weather data before fetching new data
+            clearWeatherData();
+            fetchWeatherByCoords(latitude,longitude);  // Fetch weather based on the city name
         }
     });
 
