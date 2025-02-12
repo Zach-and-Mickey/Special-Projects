@@ -67,189 +67,182 @@
         </div>
     </div>
 
-    <script>
-        // API configuration
-        const apiKey = '34d38878aa95ce19e71e8d7f39755a25';
-        const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';
+ <script>
+    // API configuration
+    const apiKey = '34d38878aa95ce19e71e8d7f39755a25';
+    const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';
 
-        // DOM elements
-        const locationInput = document.getElementById('locationInput');
-        const searchButton = document.getElementById('searchButton');
-        const locationElement = document.getElementById('location');
-        const temperatureElement = document.getElementById('temperature');
-        const descriptionElement = document.getElementById('description');
-        const humidity = document.getElementById('humidity');
-        const sunrise = document.getElementById('sunrise');
-        const sunset = document.getElementById('sunset');
+    // DOM elements
+    const locationInput = document.getElementById('locationInput');
+    const searchButton = document.getElementById('searchButton');
+    const locationElement = document.getElementById('location');
+    const temperatureElement = document.getElementById('temperature');
+    const descriptionElement = document.getElementById('description');
+    const humidity = document.getElementById('humidity');
+    const sunrise = document.getElementById('sunrise');
+    const sunset = document.getElementById('sunset');
 
-        // Event listener for the search button
-        searchButton.addEventListener('click', () => {
-            const location = locationInput.value;
-            if (location) {
-                fetchWeather(location);
-            }
-        });
-
-        // Fetch weather data function
-        function fetchWeather(location) {
-            const url = `${apiUrl}?q=${location}&appid=${apiKey}&units=imperial`;
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    // Check if the city exists in the response
-                    if (data.cod !== 200) {
-                        locationElement.textContent = "City not found. Please try again.";
-                        temperatureElement.textContent = "";
-                        descriptionElement.textContent = "";
-                        humidity.textContent = "";
-                        sunrise.textContent = "";
-                        sunset.textContent = "";
-                        return;
-                    }
-
-                    // Display weather data
-                    locationElement.textContent = data.name;
-                    temperatureElement.textContent = `Current Temperature: ${Math.round(data.main.temp)} °F`;
-
-                    // Weather description (capitalized)
-                    const weatherDescription = data.weather[0].description;
-                    const capitalizedDescription = weatherDescription.split(' ').map(word => {
-                        return word.charAt(0).toUpperCase() + word.slice(1);
-                    }).join(' ');
-                    descriptionElement.textContent = capitalizedDescription;
-
-                    humidity.textContent = data.main.humidity ? `Humidity: ${data.main.humidity}%` : "Humidity: Data not available";
-
-                    // Format sunrise and sunset times
-                    const sunriseTime = formatTime(data.sys.sunrise);
-                    const sunsetTime = formatTime(data.sys.sunset);
-                    sunrise.textContent = `Sunrise: ${sunriseTime}`;
-                    sunset.textContent = `Sunset: ${sunsetTime}`;
-
-                    // Change background image based on weather conditions
-                    updateBackground(weatherDescription);
-                })
-                .catch(error => {
-                    console.error('Error fetching weather data:', error);
-                    locationElement.textContent = "Error fetching data. Please try again later.";
-                    temperatureElement.textContent = "";
-                    descriptionElement.textContent = "";
-                    minTemp.textContent = "";
-                    maxTemp.textContent = "";
-                    humidity.textContent = "";
-                    sunrise.textContent = "";
-                    sunset.textContent = "";
-                });
+    // Event listener for the search button
+    searchButton.addEventListener('click', () => {
+        const location = locationInput.value;
+        if (location) {
+            // Clear previous weather data before fetching new data
+            clearWeatherData();
+            fetchWeather(location);  // Fetch weather based on the city name
         }
+    });
 
-        // Convert timestamp to 12-hour format
-        function formatTime(timestamp) {
-            const time = new Date(timestamp * 1000);
-            let hours = time.getHours();
-            let minutes = time.getMinutes();
-            let seconds = time.getSeconds();
-            const period = hours >= 12 ? "PM" : "AM";
-            
-            // Convert to 12-hour format
-            hours = hours % 12;
-            hours = hours ? hours : 12; // 12-hour format uses 12 instead of 0
-            minutes = minutes < 10 ? `0${minutes}` : minutes;
-            seconds = seconds < 10 ? `0${seconds}` : seconds;
-            
-            return `${hours}:${minutes}:${seconds} ${period}`;
+    // Fetch weather data function for city
+    function fetchWeather(location) {
+        const url = `${apiUrl}?q=${location}&appid=${apiKey}&units=imperial`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                // Check if the city exists in the response
+                if (data.cod !== 200) {
+                    locationElement.textContent = "City not found. Please try again.";
+                    return;
+                }
+
+                // Display weather data
+                locationElement.textContent = data.name;
+                temperatureElement.textContent = `Current Temperature: ${Math.round(data.main.temp)} °F`;
+
+                // Weather description (capitalized)
+                const weatherDescription = data.weather[0].description;
+                const capitalizedDescription = weatherDescription.split(' ').map(word => {
+                    return word.charAt(0).toUpperCase() + word.slice(1);
+                }).join(' ');
+                descriptionElement.textContent = capitalizedDescription;
+
+                humidity.textContent = data.main.humidity ? `Humidity: ${data.main.humidity}%` : "Humidity: Data not available";
+
+                // Format sunrise and sunset times
+                const sunriseTime = formatTime(data.sys.sunrise);
+                const sunsetTime = formatTime(data.sys.sunset);
+                sunrise.textContent = `Sunrise: ${sunriseTime}`;
+                sunset.textContent = `Sunset: ${sunsetTime}`;
+
+                // Change background image based on weather conditions
+                updateBackground(weatherDescription);
+            })
+            .catch(error => {
+                console.error('Error fetching weather data:', error);
+                locationElement.textContent = "Error fetching data. Please try again later.";
+            });
+    }
+
+    // Function to clear previous weather data
+    function clearWeatherData() {
+        locationElement.textContent = '';
+        temperatureElement.textContent = '';
+        descriptionElement.textContent = '';
+        humidity.textContent = '';
+        sunrise.textContent = '';
+        sunset.textContent = '';
+    }
+
+    // Convert timestamp to 12-hour format
+    function formatTime(timestamp) {
+        const time = new Date(timestamp * 1000);
+        let hours = time.getHours();
+        let minutes = time.getMinutes();
+        let seconds = time.getSeconds();
+        const period = hours >= 12 ? "PM" : "AM";
+        
+        // Convert to 12-hour format
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 12-hour format uses 12 instead of 0
+        minutes = minutes < 10 ? `0${minutes}` : minutes;
+        seconds = seconds < 10 ? `0${seconds}` : seconds;
+        
+        return `${hours}:${minutes}:${seconds} ${period}`;
+    }
+
+    // Change the background image based on the weather condition
+    function updateBackground(weatherDescription) {
+        if (weatherDescription.includes("clouds")) {
+            document.body.style.backgroundImage = "url('Clouds.jpg')";
+        } else if (weatherDescription.includes("clear sky")) {
+            document.body.style.backgroundImage = "url('Clear.jpg')";
+        } else if (weatherDescription.includes("storm")) {
+            document.body.style.backgroundImage = "url('Storm.jpg')";
+        } else if (weatherDescription.includes("rain") || weatherDescription.includes("drizzle")) {
+            document.body.style.backgroundImage = "url('Rain.jpg')";
+        } else if (weatherDescription.includes("fog") || weatherDescription.includes("mist")) {
+            document.body.style.backgroundImage = "url('Fog.jpg')";
+        } else if (weatherDescription.includes("snow")) {
+            document.body.style.backgroundImage = "url('Snow.jpg')";
         }
+    }
 
-        // Change the background image based on the weather condition
-        function updateBackground(weatherDescription) {
-            if (weatherDescription.includes("clouds")) {
-                document.body.style.backgroundImage = "url('Clouds.jpg')";
-            } else if (weatherDescription.includes("clear sky")) {
-                document.body.style.backgroundImage = "url('Clear.jpg')";
-            } else if (weatherDescription.includes("storm")) {
-                document.body.style.backgroundImage = "url('Storm.jpg')";
-            } else if (weatherDescription.includes("rain") || weatherDescription.includes("drizzle")) {
-                document.body.style.backgroundImage = "url('Rain.jpg')";
-            } else if (weatherDescription.includes("fog") || weatherDescription.includes("mist")) {
-                document.body.style.backgroundImage = "url('Fog.jpg')";
-            } else if (weatherDescription.includes("snow")) {
-                document.body.style.backgroundImage = "url('Snow.jpg')";
-            }
-        }
-        // Get user's location based on IP
-        function getUserLocation() {
-const requestOptions = {
-  method: "GET",
-  redirect: "follow"
-};
-fetch("https://api.ipgeolocation.io/ipgeo?apiKey=f9d589d85843480db71fafe41c35f360", requestOptions)
-  .then((response) => response.json())
-  .then((data) => {
-    console.log(data);
-    const latitude = data.latitude;
-    const longitude = data.longitude;
-    
-    // Now fetch the weather for that location
-    fetchWeatherByCoords(latitude, longitude);
-  })
-  .catch((error) => {
-    console.error('Error fetching location data:', error);
-    alert("Error fetching location. Please try again.");
-  });
-        }
-function fetchWeatherByCoords(latitude, longitude) {
-    const userurl = `${apiUrl}?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
+    // Get user's location based on IP
+    function getUserLocation() {
+        const requestOptions = {
+            method: "GET",
+            redirect: "follow"
+        };
 
-      fetch(userurl)
-                .then(response => response.json())
-                .then(data => {
-                    // Check if the city exists in the response
-                    if (data.cod !== 200) {
-                        locationElement.textContent = "City not found. Please try again.";
-                        temperatureElement.textContent = "";
-                        descriptionElement.textContent = "";
-                        humidity.textContent = "";
-                        sunrise.textContent = "";
-                        sunset.textContent = "";
-                        return;
-                    }
+        fetch("https://api.ipgeolocation.io/ipgeo?apiKey=f9d589d85843480db71fafe41c35f360", requestOptions)
+            .then((response) => response.json())
+            .then((data) => {
+                const latitude = data.latitude;
+                const longitude = data.longitude;
+                
+                // Now fetch the weather for that location
+                fetchWeatherByCoords(latitude, longitude);
+            })
+            .catch((error) => {
+                console.error('Error fetching location data:', error);
+                alert("Error fetching location. Please try again.");
+            });
+    }
 
-                    // Display weather data
-                    locationElement.textContent = data.name;
-                    temperatureElement.textContent = `Current Temperature: ${Math.round(data.main.temp)} °F`;
+    // Fetch weather by coordinates
+    function fetchWeatherByCoords(latitude, longitude) {
+        const userurl = `${apiUrl}?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=imperial`;
 
-                    // Weather description (capitalized)
-                    const weatherDescription = data.weather[0].description;
-                    const capitalizedDescription = weatherDescription.split(' ').map(word => {
-                        return word.charAt(0).toUpperCase() + word.slice(1);
-                    }).join(' ');
-                    descriptionElement.textContent = capitalizedDescription;
+        fetch(userurl)
+            .then(response => response.json())
+            .then(data => {
+                // Check if the city exists in the response
+                if (data.cod !== 200) {
+                    locationElement.textContent = "City not found. Please try again.";
+                    return;
+                }
 
-                    humidity.textContent = data.main.humidity ? `Humidity: ${data.main.humidity}%` : "Humidity: Data not available";
+                // Display weather data
+                locationElement.textContent = data.name;
+                temperatureElement.textContent = `Current Temperature: ${Math.round(data.main.temp)} °F`;
 
-                    // Format sunrise and sunset times
-                    const sunriseTime = formatTime(data.sys.sunrise);
-                    const sunsetTime = formatTime(data.sys.sunset);
-                    sunrise.textContent = `Sunrise: ${sunriseTime}`;
-                    sunset.textContent = `Sunset: ${sunsetTime}`;
+                // Weather description (capitalized)
+                const weatherDescription = data.weather[0].description;
+                const capitalizedDescription = weatherDescription.split(' ').map(word => {
+                    return word.charAt(0).toUpperCase() + word.slice(1);
+                }).join(' ');
+                descriptionElement.textContent = capitalizedDescription;
 
-                    // Change background image based on weather conditions
-                    updateBackground(weatherDescription);
-                })
-                .catch(error => {
-                    console.error('Error fetching weather data:', error);
-                    locationElement.textContent = "Error fetching data. Please try again later.";
-                    temperatureElement.textContent = "";
-                    descriptionElement.textContent = "";
-                    minTemp.textContent = "";
-                    maxTemp.textContent = "";
-                    humidity.textContent = "";
-                    sunrise.textContent = "";
-                    sunset.textContent = "";
-                });
-        }
-        // Fetch the user's location and show the weather for that location on page load
-        window.onload = getUserLocation();
-    </script>
+                humidity.textContent = data.main.humidity ? `Humidity: ${data.main.humidity}%` : "Humidity: Data not available";
+
+                // Format sunrise and sunset times
+                const sunriseTime = formatTime(data.sys.sunrise);
+                const sunsetTime = formatTime(data.sys.sunset);
+                sunrise.textContent = `Sunrise: ${sunriseTime}`;
+                sunset.textContent = `Sunset: ${sunsetTime}`;
+
+                // Change background image based on weather conditions
+                updateBackground(weatherDescription);
+            })
+            .catch(error => {
+                console.error('Error fetching weather data:', error);
+                locationElement.textContent = "Error fetching data. Please try again later.";
+            });
+    }
+
+    // Fetch the user's location and show the weather for that location on page load
+    window.onload = getUserLocation;
+</script>
+
 </body>
 </html>
