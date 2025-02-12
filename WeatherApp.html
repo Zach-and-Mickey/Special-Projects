@@ -175,7 +175,6 @@
                 document.body.style.backgroundImage = "url('Snow.jpg')";
             }
         }
-
         // Get user's location based on IP
         function getUserLocation() {
 const requestOptions = {
@@ -196,10 +195,9 @@ fetch("https://api.ipgeolocation.io/ipgeo?apiKey=f9d589d85843480db71fafe41c35f36
     console.error('Error fetching location data:', error);
     alert("Error fetching location. Please try again.");
   });
-
+        }
         // Fetch the user's location and show the weather for that location on page load
         window.onload = getUserLocation();
-}
     </script>
 </body>
 </html>
