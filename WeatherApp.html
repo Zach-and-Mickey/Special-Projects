@@ -15,7 +15,7 @@
             background-position: center center;
             background-repeat: no-repeat;
             image-rendering: pixelated;
-            transition: background-image 3s ease-in-out;
+            transition: background-image 1.5s ease-in-out;
             font-family: Arial, sans-serif;
             display:flex;
         }
@@ -196,22 +196,29 @@
             return `${hours}:${minutes}:${seconds} ${period}`;
         }
 
-        // Change the background image based on the weather condition
-        function updateBackground(weatherDescription) {
-            if (weatherDescription.includes("clouds")) {
-                document.body.style.backgroundImage = "url('Clouds.jpg')";
-            } else if (weatherDescription.includes("clear sky")) {
-                document.body.style.backgroundImage = "url('Clear.jpg')";
-            } else if (weatherDescription.includes("storm")) {
-                document.body.style.backgroundImage = "url('Storm.jpg')";
-            } else if (weatherDescription.includes("rain") || weatherDescription.includes("drizzle")) {
-                document.body.style.backgroundImage = "url('Rain.jpg')";
-            } else if (weatherDescription.includes("fog") || weatherDescription.includes("mist")) {
-                document.body.style.backgroundImage = "url('Fog.jpg')";
-            } else if (weatherDescription.includes("snow")) {
-                document.body.style.backgroundImage = "url('Snow.jpg')";
-            }
-        }
+// Change the background image based on the weather condition
+function updateBackground(weatherDescription) {
+    let newBackground = '';
+    
+    if (weatherDescription.includes("clouds")) {
+        newBackground = "url('Clouds.jpg')";
+    } else if (weatherDescription.includes("clear sky")) {
+        newBackground = "url('Clear.jpg')";
+    } else if (weatherDescription.includes("storm")) {
+        newBackground = "url('Storm.jpg')";
+    } else if (weatherDescription.includes("rain") || weatherDescription.includes("drizzle")) {
+        newBackground = "url('Rain.jpg')";
+    } else if (weatherDescription.includes("fog") || weatherDescription.includes("mist")) {
+        newBackground = "url('Fog.jpg')";
+    } else if (weatherDescription.includes("snow")) {
+        newBackground = "url('Snow.jpg')";
+    }
+    
+    // Apply the background image to the body, which will trigger the transition
+    if (newBackground) {
+        document.body.style.backgroundImage = newBackground;
+    }
+}
 
         // Fetch the user's location and show the weather for that location on page load
         window.onload = function() {
