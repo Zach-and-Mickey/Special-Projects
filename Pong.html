@@ -58,27 +58,45 @@
     // Game state
     let gameRunning = false;
 
-    // Touch events for human player (right paddle)
+    // Check if the device is mobile or desktop based on window width
+    const isMobile = window.innerWidth < 800;
+
+    // Touch events for human player (right paddle) - for mobile
     let touchStartY = 0;
     let touchEndY = 0;
 
-    canvas.addEventListener('touchstart', (event) => {
-        event.preventDefault();  // Prevent default behavior (scrolling)
-        touchStartY = event.touches[0].clientY;
-    });
+    if (isMobile) {
+        // Mobile controls (touch events)
+        canvas.addEventListener('touchstart', (event) => {
+            event.preventDefault();  // Prevent default behavior (scrolling)
+            touchStartY = event.touches[0].clientY;
+        });
 
-    canvas.addEventListener('touchmove', (event) => {
-        event.preventDefault();  // Prevent default behavior (scrolling)
-        touchEndY = event.touches[0].clientY;
-        player1Dy = (touchEndY - touchStartY) * 0.05;  // Adjust the multiplier for sensitivity
-        touchStartY = touchEndY;
-    });
+        canvas.addEventListener('touchmove', (event) => {
+            event.preventDefault();  // Prevent default behavior (scrolling)
+            touchEndY = event.touches[0].clientY;
+            player1Dy = (touchEndY - touchStartY) * 0.05;  // Adjust the multiplier for sensitivity
+            touchStartY = touchEndY;
+        });
+    } else {
+        // Desktop controls (keyboard events)
+        document.addEventListener('keydown', (event) => {
+            if (event.key === "ArrowUp") player1Dy = -paddleSpeed;
+            else if (event.key === "ArrowDown") player1Dy = paddleSpeed;
+            else if (event.key === " " && !gameRunning) startGame();  // Start game when spacebar is pressed
+        });
 
+        document.addEventListener('keyup', (event) => {
+            if (event.key === "ArrowUp" || event.key === "ArrowDown") player1Dy = 0;
+        });
+    }
+
+    // Start the game when tap or click is pressed
     canvas.addEventListener('click', () => {
-        if (!gameRunning) startGame();  // Start game when tapped
+        if (!gameRunning) startGame();  // Start game when tapped/clicked
     });
 
-    // Start the game when tap is pressed
+    // Start the game function
     function startGame() {
         if (!gameRunning) {
             gameRunning = true;
