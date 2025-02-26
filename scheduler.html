@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheduler</title>
+  <style>
+    /* CSS Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      align-content: center;
+      margin: auto;
+      margin-bottom: 50px;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    #button-container {
+      display: flex;
+      flex-direction: column;
+      margin: auto;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      margin: auto;
+    }
+
+    .teamFields {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      margin: auto;
+    }
+
+    .scheduleResult {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Automatic Schedule Maker</h1>
+
+  <form id="schedulerForm">
+    <label for="games_per_night">Number of Games Per Night:</label>
+    <input type="number" id="games_per_night" required><br><br>
+
+    <label for="games_per_team">Number of Games Per Team:</label>
+    <input type="number" id="games_per_team" required><br><br>
+
+    <div class='teamFields' id="teamFields">
+      <label for="team_name_1">Team 1 Name:</label>
+      <input type="text" id="team_name_1" required><br><br>
+    </div>
+  </form>
+
+  <div id='button-container'>
+    <button type="button" onclick="addTeam()">Add Next Team</button><br><br>
+    <button type="button" onclick="calculateSchedule()">Generate Schedule</button>  
+  </div>
+
+  <h2>Generated Schedule:</h2>
+  <p id="scheduleResult" class="scheduleResult"></p>
+
+  <script>
+    let teamCounter = 1;
+
+    // Function to add a new team input field dynamically
+    function addTeam() {
+      teamCounter++;
+      const teamDiv = document.createElement('div');
+      teamDiv.innerHTML = `
+        <label for="team_name_${teamCounter}">Team ${teamCounter} Name:</label>
+        <input type="text" class='teamFields' id="team_name_${teamCounter}" required><br><br>
+      `;
+      document.getElementById('teamFields').appendChild(teamDiv);
+    }
+
+    // Function to calculate and display the schedule
+    function calculateSchedule() {
+      const gamesPerNight = parseInt(document.getElementById('games_per_night').value);
+      const gamesPerTeam = parseInt(document.getElementById('games_per_team').value);
+
+      if (isNaN(gamesPerNight) || isNaN(gamesPerTeam)) {
+        alert('Please enter valid numbers for games per night and per team.');
+        return;
+      }
+
+      let teams = [];
+      for (let i = 1; i <= teamCounter; i++) {
+        const teamName = document.getElementById(`team_name_${i}`).value;
+        if (teamName) {
+          teams.push(teamName);
+        }
+      }
+
+      let numTeams = teams.length;
+
+      if (numTeams < 2) {
+        alert('At least two teams are required for the schedule.');
+        return;
+      }
+
+      // Generate matchups (home & away) for each pair of teams
+      let schedule = [];
+      let totalGames = 0;
+      for (let i = 0; i < numTeams; i++) {
+        for (let j = i + 1; j < numTeams; j++) {
+          schedule.push([teams[i], teams[j]]);
+          totalGames++;
+        }
+      }
+
+      // Calculate total rounds (totalGames / gamesPerNight)
+      let totalRounds = Math.ceil(totalGames / gamesPerNight);
+
+      // Prepare the text to display the schedule
+      let scheduleText = `Total Games: ${totalGames}\n`;
+      scheduleText += `Total Rounds: ${totalRounds}\n\n`;
+
+      for (let round = 0; round < totalRounds; round++) {
+        scheduleText += `Round ${round + 1}:\n`;
+
+        for (let game = round * gamesPerNight; game < (round + 1) * gamesPerNight && game < schedule.length; game++) {
+          let gameMatch = schedule[game];
+          scheduleText += `${gameMatch[0]} vs ${gameMatch[1]}\n`;
+        }
+
+        scheduleText += '\n';
+      }
+
+      document.getElementById('scheduleResult').textContent = scheduleText;
+    }
+  </script>
+
+</body>
+</html>
