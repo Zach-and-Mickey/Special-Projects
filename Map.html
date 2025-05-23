@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Leaflet Map</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+  <style>
+    html { display: flex; justify-content: center; align-items: center;}
+    #map { height: 90vh; width: 95vw; margin: auto;}
+    h1 { color: rgb(0,150,255); text-decoration: underline wavy; text-underline-offset: 10px; text-align: center;}
+  </style>
+</head>
+<body>
+  <h1>M&Z's Travel Map!</h1>
+  <div id="map"></div>
+  
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <script>
+    var map = L.map('map').setView([40.000, -100.000], 2); // Middle of US
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+	minZoom: 2
+    }).addTo(map);
+
+    L.marker([33.5742582, -83.857559])
+      .addTo(map)		
+      .bindPopup('My Home')
+
+var campingLayer = L.layerGroup();
+var missionsLayer = L.layerGroup();
+
+// Fort Mountain Camping
+var circle = L.circleMarker([34.76516, -84.701866], {
+  radius: 15, // initial, in pixels
+  color: 'blue',
+  fillColor: '#00a2ff',
+  fillOpacity: 0.5
+}).addTo(campingLayer)
+  .bindPopup('First Camping Trip Together 05/23/25')
+
+// Honduras Mission Trip
+var circle = L.circleMarker([13.430712, -86.806643], {
+ radius: 15,
+ color: 'green',
+ fillColor: '#00ff80',
+ fillOpacity: .5
+}).addTo(missionsLayer)
+  .bindPopup('Multiple Trips to Mision Bautista El Buen Samaritano')
+
+campingLayer.addTo(map);
+missionsLayer.addTo(map);
+
+var overlayMaps = {
+"Camping Trips": campingLayer,
+"Mission Trips": missionsLayer
+};
+
+L.control.layers(null, overlayMaps).addTo(map);
+
+
+var popup = L.popup();
+var circle= L.circle();
+
+
+
+function onMapClick(e) {
+    popup
+        .setLatLng(e.latlng)
+        .setContent("You clicked the map at  " + e.latlng.toString())
+        .openOn(map);
+}
+
+map.on('click', onMapClick);
+
+map.on('zoomend', function () {
+  console.log("Zoom level changed to:", map.getZoom());
+});
+
+L.Control.geocoder({
+  defaultMarkGeocode: false
+})
+  .addTo(map);
+  </script>
+</body>
+</html>
