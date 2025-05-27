@@ -82,6 +82,9 @@ map.on('zoomend', function () {
 L.Control.geocoder({
   defaultMarkGeocode: false
 })
+  .on('markgeocode', function(e) {
+    map.fitBounds(e.geocode.bbox);
+  })
   .addTo(map);
   </script>
 </body>
