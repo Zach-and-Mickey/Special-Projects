@@ -17,79 +17,76 @@
   
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-  <script>
-    var map = L.map('map').setView([40.000, -100.000], 2); // Middle of US
+<script>
+  function adjustDPR(radius) {
+    return radius * window.devicePixelRatio;
+  }
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-	minZoom: 2
-    }).addTo(map);
+  var map = L.map('map').setView([40.000, -100.000], 2); // Middle of US
 
-    L.marker([33.5742582, -83.857559])
-      .addTo(map)		
-      .bindPopup('My Home')
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    minZoom: 2
+  }).addTo(map);
 
-var campingLayer = L.layerGroup();
-var missionsLayer = L.layerGroup();
+  L.marker([33.5742582, -83.857559])
+    .addTo(map)
+    .bindPopup('My Home');
 
-// Fort Mountain Camping
-var circle = L.circleMarker([34.76516, -84.701866], {
-  radius: 15, // initial, in pixels
-  color: 'blue',
-  fillColor: '#00a2ff',
-  fillOpacity: 0.5
-}).addTo(campingLayer)
-  .bindPopup('First Camping Trip Together 05/23/25')
+  var campingLayer = L.layerGroup();
+  var missionsLayer = L.layerGroup();
 
-// Honduras Mission Trip
-var circle = L.circleMarker([13.430712, -86.806643], {
- radius: 15,
- color: 'green',
- fillColor: '#00ff80',
- fillOpacity: .5
-}).addTo(missionsLayer)
-  .bindPopup('Multiple Trips to Mision Bautista El Buen Samaritano')
+  // Fort Mountain Camping
+  var fortMountainMarker = L.circleMarker([34.76516, -84.701866], {
+    radius: adjustDPR(10),  // Base size adjusted for screen
+    color: 'blue',
+    fillColor: '#00a2ff',
+    fillOpacity: 0.5
+  }).addTo(campingLayer)
+    .bindPopup('First Camping Trip Together 05/23/25');
 
-campingLayer.addTo(map);
-missionsLayer.addTo(map);
+  // Honduras Mission Trip
+  var hondurasMarker = L.circleMarker([13.430712, -86.806643], {
+    radius: adjustDPR(10),
+    color: 'green',
+    fillColor: '#00ff80',
+    fillOpacity: 0.5
+  }).addTo(missionsLayer)
+    .bindPopup('Multiple Trips to Mision Bautista El Buen Samaritano');
 
-var overlayMaps = {
-"Camping Trips": campingLayer,
-"Mission Trips": missionsLayer
-};
+  campingLayer.addTo(map);
+  missionsLayer.addTo(map);
 
-L.control.layers(null, overlayMaps).addTo(map);
+  var overlayMaps = {
+    "Camping Trips": campingLayer,
+    "Mission Trips": missionsLayer
+  };
 
+  L.control.layers(null, overlayMaps).addTo(map);
 
-var popup = L.popup();
-var circle= L.circle();
+  var popup = L.popup();
 
-
-
-function onMapClick(e) {
+  function onMapClick(e) {
     popup
-        .setLatLng(e.latlng)
-        .setContent("You clicked the map at  " + e.latlng.toString())
-        .openOn(map);
-}
+      .setLatLng(e.latlng)
+      .setContent("You clicked the map at  " + e.latlng.toString())
+      .openOn(map);
+  }
 
-function adjustDPR(radius) {
-	return radius*window.devicePixelRatio;
-}
+  map.on('click', onMapClick);
 
-map.on('click', onMapClick);
+  map.on('zoomend', function () {
+    console.log("Zoom level changed to:", map.getZoom());
+  });
 
-map.on('zoomend', function (adjustDPR) {
-  console.log("Zoom level changed to:", map.getZoom());
-});
-
-L.Control.geocoder({
-  defaultMarkGeocode: false
-})
-  .on('markgeocode', function(e) {
-    map.fitBounds(e.geocode.bbox);
+  L.Control.geocoder({
+    defaultMarkGeocode: false
   })
-  .addTo(map);
-  </script>
+    .on('markgeocode', function (e) {
+      map.fitBounds(e.geocode.bbox);
+    })
+    .addTo(map);
+</script>
+
 </body>
 </html>
