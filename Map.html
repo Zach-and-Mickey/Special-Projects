@@ -73,9 +73,13 @@ function onMapClick(e) {
         .openOn(map);
 }
 
+function adjustDPR(radius) {
+	return radius*window.devicePixelRatio;
+}
+
 map.on('click', onMapClick);
 
-map.on('zoomend', function () {
+map.on('zoomend', function (adjustDPR) {
   console.log("Zoom level changed to:", map.getZoom());
 });
 
