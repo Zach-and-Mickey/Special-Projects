@@ -33,7 +33,7 @@
     .addTo(map)
     .bindPopup('My Home');
 
-  var campingLayer = L.layerGroup();
+  var vacationLayer = L.layerGroup();
   var missionsLayer = L.layerGroup();
 
   // Fort Mountain Camping
@@ -42,7 +42,7 @@
     color: 'blue',
     fillColor: '#00a2ff',
     fillOpacity: 0.5
-  }).addTo(campingLayer)
+  }).addTo(vacationLayer)
     .bindPopup('First Camping Trip Together 05/23/25');
 
   // Honduras Mission Trip
@@ -54,11 +54,47 @@
   }).addTo(missionsLayer)
     .bindPopup('Multiple Trips to Mision Bautista El Buen Samaritano');
 
-  campingLayer.addTo(map);
+  // Cruise 
+  var SaintThomasMarker = L.circleMarker([18.3319, -64.9222], {
+    radius: adjustDPR(10),  // Base size adjusted for screen
+    color: 'blue',
+    fillColor: '#00a2ff',
+    fillOpacity: 0.5
+  }).addTo(vacationLayer)
+    .bindPopup('St. Thomas, US Virgin Islands  06/03/25');
+
+  // Cruise 18°27'48"N 66°06'35"W
+  var SanJuanMarker = L.circleMarker([18.4633, -66.1097], {
+    radius: adjustDPR(10),  // Base size adjusted for screen
+    color: 'blue',
+    fillColor: '#00a2ff',
+    fillOpacity: 0.5
+  }).addTo(vacationLayer)
+    .bindPopup('San Juan, Puerto Rico  06/04/25');
+
+  // Cruise 19°50'02"N 70°46'32"W
+  var AmberCoveMarker = L.circleMarker([19.8339, -70.7755], {
+    radius: adjustDPR(10),  // Base size adjusted for screen
+    color: 'blue',
+    fillColor: '#00a2ff',
+    fillOpacity: 0.5
+  }).addTo(vacationLayer)
+    .bindPopup('Amber Cove, D.R.  06/05/25');
+
+  // Cruise 21°25'39"N 71°08'48"W
+  var GrandTurksMarker = L.circleMarker([21.4275, -71.1467], {
+    radius: adjustDPR(10),  // Base size adjusted for screen
+    color: 'blue',
+    fillColor: '#00a2ff',
+    fillOpacity: 0.5
+  }).addTo(vacationLayer)
+    .bindPopup('Grand Turks 06/06/25');
+
+  vacationLayer.addTo(map);
   missionsLayer.addTo(map);
 
   var overlayMaps = {
-    "Camping Trips": campingLayer,
+    "Vacation Trips": vacationLayer,
     "Mission Trips": missionsLayer
   };
 
