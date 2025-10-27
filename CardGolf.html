@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Card Deal Layout (Real Deck)</title>
+<style>
+body {
+  background: #006600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+  color: #000;
+  font-family: "Segoe UI", sans-serif;
+}
+* { user-select: none; }
+button, .card { cursor: pointer; }
+#scoreboard, table, td, th { cursor: default; }
+table,tr,th,td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+    padding: 15px;
+    margin: 20px;
+    justify-content: center;
+}
+#cardTable {
+  position: relative;
+  width: 950px;
+  height: 650px;
+
+  /* centers everything inside table */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* center horizontally */
+}
+
+#columns {
+  display: flex;
+  justify-content: center; /* center the whole 7-column group */
+  gap: 20px;
+}
+
+.column {
+  position: relative;
+  width: 80px;
+  height: 240px; /* enough for 5 rows overlapping */
+}
+
+.card {
+  position: absolute;
+  width: 80px;
+  height: 120px;
+  border-radius: 8px;
+  border: 1px solid #111;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 6px;
+}
+
+.suit { font-size: 20px; }
+.rank { font-weight: bold; }
+.red { color: red; }
+.back {
+  background: linear-gradient(135deg, #0044cc, #0077ff);
+  border: 2px solid white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.counter {
+    font-size: 40px;
+    color: rgba(0,0,0,.5);
+}
+
+
+#stack {
+  position: absolute;
+  bottom: 250px;
+  width: 80px;
+  transform: translateX(-100%);
+}
+#waste {
+  position: absolute;
+  bottom: 250px;
+  width: 80px;
+  transform: translateX(100%);
+}
+
+.flip {
+  transition: transform 0.4s;
+  transform: rotateY(180deg);
+}
+
+</style>
+</head>
+<body>
+<body>
+    <table id="scoreboard" >
+        <tr>
+            <th>Round 1</th>
+            <th>Round 2</th>
+            <th>Round 3</th>
+            <th>Round 4</th>
+            <th>Round 5</th>
+            <th>Round 6</th>
+            <th>Round 7</th>
+            <th>Round 8</th>
+            <th>Round 9</th>
+            <th>Total</th>
+        </tr>
+        <tr>
+            <td id="round1"></td>
+            <td id="round2"></td>
+            <td id="round3"></td>
+            <td id="round4"></td>
+            <td id="round5"></td>
+            <td id="round6"></td>
+            <td id="round7"></td>
+            <td id="round8"></td>
+            <td id="round9"></td>
+            <td id="total"></td>
+        </tr>
+    </table>
+
+  <div id="cardTable">
+    <div id="columns"></div>
+    <div id="stack"></div>
+    <div id="waste"></div>
+  </div>
+  <div id="menuButtons">
+    <button id="newGameButton">New Game</button>
+    <button id="nextRoundButton">Next Round</button>
+  </div>
+
+  <script>
+const suits = ['♠','♥','♦','♣'];
+const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const rankOrder = ranks;
+
+let deck = [];
+let cardsLeft = 17;
+const cols = 7;
+const rows = 5;
+const overlap = 30;
+let currentRound = 0;
+const maxRounds = 9;
+let roundScores = Array(maxRounds).fill(0); // stores each round score
+let totalScore = 0;
+
+
+const columnsContainer = document.getElementById('columns');
+const stackContainer = document.getElementById('stack');
+const wasteContainer = document.getElementById('waste');
+
+let currentWasteCard = null;
+
+// Helper to check playable
+function isPlayable(rank, wasteRank) {
+  const i = rankOrder.indexOf(rank);
+  const j = rankOrder.indexOf(wasteRank);
+  return Math.abs(i-j) === 1 || Math.abs(i-j) === 12; // wrap A<->K
+}
+
+// Move card to waste pile
+function moveToWaste(cardElem, cardData) {
+  if (cardElem.parentElement) cardElem.parentElement.removeChild(cardElem);
+
+  cardElem.classList.remove('back');
+  cardElem.innerHTML = `
+    <div class="rank">${cardData.rank} ${cardData.suit}</div>
+    <div class="suit" style="text-align:center; font-size:40px;">${cardData.suit}</div>
+    <div class="rank" style="text-align:left; transform:rotate(180deg);">${cardData.rank} ${cardData.suit}</div>
+  `;
+
+  // Reset position for waste pile
+  cardElem.style.top = '0px';
+  cardElem.style.left = '0px';
+
+  wasteContainer.appendChild(cardElem);
+  currentWasteCard = { rank: cardData.rank, suit: cardData.suit };
+
+}
+
+// New Deal function
+function newDeal() {
+  // Clear previous board
+  columnsContainer.innerHTML = '';
+  stackContainer.innerHTML = '';
+  wasteContainer.innerHTML = '';
+  currentWasteCard = null;
+  cardsLeft = 17;
+
+  // Build and shuffle deck
+  deck = [];
+  for (let s of suits) for (let r of ranks) deck.push({suit:s, rank:r});
+  for (let i = deck.length -1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+
+  // Create columns
+  const columns = [];
+  for (let i=0; i<cols; i++) {
+    const colDiv = document.createElement('div');
+    colDiv.classList.add('column');
+    columnsContainer.appendChild(colDiv);
+    columns.push(colDiv);
+  }
+
+  // Deal cards to columns
+  let cardIndex = 0;
+  for (let col=0; col<cols; col++) {
+    for (let row=0; row<rows; row++) {
+      if (cardIndex >= deck.length) break;
+      const cardData = deck[cardIndex++];
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.style.top = `${row*overlap}px`;
+      if (cardData.suit==='♥' || cardData.suit==='♦') card.classList.add('red');
+
+      card.dataset.rank = cardData.rank;
+      card.dataset.suit = cardData.suit;
+
+      card.innerHTML = `
+        <div class="rank">${cardData.rank} ${cardData.suit}</div>
+        <div class="suit" style="text-align:center; font-size:40px;">${cardData.suit}</div>
+        <div class="rank" style="text-align:left; transform:rotate(180deg);">${cardData.rank} ${cardData.suit}</div>
+      `;
+
+      // Only top card clickable
+      card.addEventListener('click', () => {
+        const columnCards = Array.from(columns[col].children);
+        if (columnCards[columnCards.length-1] !== card) return; // not top card
+        if (!currentWasteCard) return;
+        if (isPlayable(card.dataset.rank, currentWasteCard.rank)) {
+          moveToWaste(card, cardData);
+        }
+      });
+
+      columns[col].appendChild(card);
+    }
+  }
+
+  // Remaining cards go to stack
+  for (; cardIndex < deck.length; cardIndex++) {
+    const card = document.createElement('div');
+    card.classList.add('card','back');
+    stackContainer.appendChild(card);
+  }
+}
+
+function updateStackCounter() {
+  const topCard = stackContainer.lastElementChild;
+  if (!topCard) return;
+
+  // Remove existing counter if any
+  const oldCounter = topCard.querySelector('.counter');
+  if (oldCounter) oldCounter.remove();
+
+  // Add new counter
+  const counterDiv = document.createElement('div');
+  counterDiv.classList.add('counter');
+  counterDiv.innerText = cardsLeft;
+  topCard.appendChild(counterDiv);
+}
+
+// Initial display
+updateStackCounter();
+// Stack click to flip top card
+stackContainer.addEventListener('click', () => {
+  const topCard = stackContainer.lastElementChild;
+  if (!topCard) return;
+
+  const cardData = deck.pop();
+  if (!cardData) return;
+
+  moveToWaste(topCard, cardData);
+
+  cardsLeft -=1;
+  updateStackCounter();
+});
+
+// Function to calculate score 
+function calculateRoundScore() {
+  let score = 0
+  score = 52-(wasteContainer.children.length+(2*cardsLeft)); // count all remaining cards
+  return score;
+}
+
+// Function to place scores in chart
+function updateScoreboard() {
+  const scoreboard = document.getElementById('scoreboard');
+  const scoreCells = document.querySelectorAll("#scoreboard td");
+
+  
+  // 10 round cells
+
+for (let i = 0; i < maxRounds; i++) {
+    scoreCells[i].innerText = roundScores[i] ? roundScores[i] : '';
+}
+
+  
+// total cell 
+totalScore = roundScores.reduce((a,b) => a+b, 0); 
+scoreCells[9].innerText = totalScore;
+}
+
+// Next Round Button and update score and round
+document.getElementById('nextRoundButton').addEventListener('click', () => {
+  if (currentRound >= maxRounds) return; // already finished
+  
+  const score = calculateRoundScore();
+  roundScores[currentRound] = score;
+  updateScoreboard();
+  
+  currentRound++;
+  newDeal(); // start next round
+});
+
+// Bind New Game button and reset score and rounds
+document.getElementById('newGameButton').addEventListener('click', () => {
+  currentRound = 0;
+  roundScores = Array(maxRounds).fill(null);
+  totalScore = 0;
+  updateScoreboard();
+  newDeal();
+});
+
+
+// Initial deal
+newDeal();
+  </script>
+</body>
+</html>
