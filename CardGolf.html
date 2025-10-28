@@ -32,24 +32,46 @@ button, .card {
   cursor: pointer;
   touch-action: manipulation;
 }
+button {
+  padding: 8px;
+  font-size: clamp(15px, 3vw, 40px);
+  color:#006600;
+  background: rgb(195, 204, 212);
+  border-radius: 26px;
+  margin: 2vw;
+}
+button:hover {
+  background: rgb(229, 236, 243);
+}
 #scoreboard, table, td, th {
   cursor: default;
 }
 
 /* Table Styling */
-table, tr, th, td {
+table, tr, th, td, caption {
   border: 1px solid black;
   border-collapse: collapse;
   text-align: center;
   padding: 8px;
-  font-size: clamp(12px, 2vw, 16px);
+  font-size: clamp(15px, 3vw, 40px);
 }
-
+.current-round {
+box-shadow: 0 0 12px 4px #1bff00;
+    border-color: #1bff00;
+    background-color: rgba(27, 255, 0,.75);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+caption {
+  font-size: 2rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #0044cc, #0077ff);
+}
 /* Main Game Area */
 #cardTable {
   position: relative;
   width: 100%;
-  height: 40vh;
+  height: auto;
+  min-height: 50vh;
   max-width: 1000px;
   margin: 0 auto;
   display: flex;
@@ -64,16 +86,23 @@ table, tr, th, td {
   align-items: center;
   width: 40vw;
   padding: 0 5%;
-  min-height: 100px;
+  gap: 5%;
 }
 
-#stack, #waste {
+#stack, #waste{
   position: relative;
   width: clamp(60px, 12vw, 100px);
-  height: clamp(80px, 16vw, 140px);
+  aspect-ratio: 7/10;
   border: 2px dashed rgba(255,255,255,0.3);
   border-radius: 8px;
   background: rgba(0,0,0,0.1);
+}
+#stack .card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
 }
 
 #stack { transform: none; }
@@ -102,17 +131,18 @@ table, tr, th, td {
 }
 
 .column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
-  flex: 1;
-  min-width: 60px;
-  max-width: 140px;
+  width: calc((90vw - (6 * 2vw)) / 7);
 }
 
 /* Card Styling */
 .card {
   position: absolute;
   width: 100%;
-  height: clamp(80px, 16vw, 140px);
+  aspect-ratio: 7/10;
   border-radius: 8px;
   border: 1px solid #111;
   background-color: white;
@@ -134,11 +164,13 @@ table, tr, th, td {
 
 /* Card Content */
 .suit {
-  font-size: clamp(14px, 3vw, 24px);
+  font-size: clamp(40px, 8vw, 100px);
 }
 .rank {
   font-weight: bold;
-  font-size: clamp(16px, 3.5vw, 26px);
+  font-size: clamp(10px, 3.5vw, 26px);
+  white-space: nowrap;
+  overflow: hidden;
 }
 .red { color: red; }
 
@@ -161,18 +193,12 @@ table, tr, th, td {
 
 /* Overlapping Cards in Column */
 .column .card {
-  top: 0;
-  left: 0;
+  position: relative;
+  margin-top: -95%;
 }
-
-.column .card:nth-child(1) { top: 0; }
-.column .card:nth-child(2) { top: 18%; }
-.column .card:nth-child(3) { top: 36%; }
-.column .card:nth-child(4) { top: 54%; }
-.column .card:nth-child(5) { top: 72%; }
-.column .card:nth-child(6) { top: 90%; }
-.column .card:nth-child(7) { top: 108%; }
-/* Add more as needed */
+.column .card:first-child {
+  margin-top:0;
+}
 
 /* Counter (optional) */
 .counter {
@@ -180,20 +206,21 @@ table, tr, th, td {
   color: rgba(0,0,0,.5);
   text-align: center;
 }
-
+#waste .card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+#waste .card .rank {
+  font-size: clamp(18px, 3vw, 28px);
+}
+#waste .card .suit {
+  font-size: clamp(24px, 7vw, 55px);
+}
 /* Responsive Adjustments */
 @media (max-width: 600px) {
-  #topRow {
-    padding: 0 2%;
-    gap: 10px;
-  }
-  #columns {
-    gap: 6px;
-    padding: 0 1%;
-  }
-  .column .card:nth-child(n+6) {
-    top: calc(18% * (n - 1)) !important; /* Stack tighter */
-  }
 }
 
 </style>
@@ -202,15 +229,18 @@ table, tr, th, td {
 <body>
     <table id="scoreboard" >
         <tr>
-            <th>Round 1</th>
-            <th>Round 2</th>
-            <th>Round 3</th>
-            <th>Round 4</th>
-            <th>Round 5</th>
-            <th>Round 6</th>
-            <th>Round 7</th>
-            <th>Round 8</th>
-            <th>Round 9</th>
+            <caption>Golf</caption>
+        </tr>
+        <tr>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
+            <th>4</th>
+            <th>5</th>
+            <th>6</th>
+            <th>7</th>
+            <th>8</th>
+            <th>9</th>
             <th>Total</th>
         </tr>
         <tr>
@@ -237,7 +267,7 @@ table, tr, th, td {
     
   <div id="menuButtons">
     <button id="newGameButton">New Game</button>
-    <button id="nextRoundButton">Next Round</button>
+    <button id="nextRoundButton">Next Hole</button>
   </div>
 
   <script>
@@ -269,24 +299,24 @@ function isPlayable(rank, wasteRank) {
   return Math.abs(i-j) === 1 || Math.abs(i-j) === 12; // wrap A<->K
 }
 
-// Move card to waste pile
+//Move Card to Waste Pile
 function moveToWaste(cardElem, cardData) {
   if (cardElem.parentElement) cardElem.parentElement.removeChild(cardElem);
+
+  // Reset any transforms or positions
+  cardElem.style.transform = '';
+  cardElem.style.top = '';
+  cardElem.style.left = '';
+  cardElem.style.position = ''; // will be overridden by CSS
 
   cardElem.classList.remove('back');
   cardElem.innerHTML = `
     <div class="rank">${cardData.rank} ${cardData.suit}</div>
-    <div class="suit" style="text-align:center; font-size:40px;">${cardData.suit}</div>
-    <div class="rank" style="text-align:left; transform:rotate(180deg);">${cardData.rank} ${cardData.suit}</div>
+    <div class="suit" style="text-align:center;">${cardData.suit}</div>
   `;
-
-  // Reset position for waste pile
-  cardElem.style.top = '0px';
-  cardElem.style.left = '0px';
 
   wasteContainer.appendChild(cardElem);
   currentWasteCard = { rank: cardData.rank, suit: cardData.suit };
-
 }
 
 // New Deal function
@@ -297,6 +327,7 @@ function newDeal() {
   wasteContainer.innerHTML = '';
   currentWasteCard = null;
   cardsLeft = 17;
+  updateScoreboard();
 
   // Build and shuffle deck
   deck = [];
@@ -323,7 +354,6 @@ function newDeal() {
       const cardData = deck[cardIndex++];
       const card = document.createElement('div');
       card.classList.add('card');
-      card.style.top = `${row*overlap}px`;
       if (cardData.suit==='♥' || cardData.suit==='♦') card.classList.add('red');
 
       card.dataset.rank = cardData.rank;
@@ -331,7 +361,7 @@ function newDeal() {
 
       card.innerHTML = `
         <div class="rank">${cardData.rank} ${cardData.suit}</div>
-        <div class="suit" style="text-align:center; font-size:40px;">${cardData.suit}</div>
+        <div class="suit" style="text-align:center;">${cardData.suit}</div>
       `;
 
       // Only top card clickable
@@ -403,13 +433,26 @@ function updateScoreboard() {
   // 10 round cells
 
 for (let i = 0; i < maxRounds; i++) {
-    scoreCells[i].innerText = roundScores[i] ? roundScores[i] : '';
+    scoreCells[i].innerText = roundScores[i] ? roundScores[i] : '-';
 }
 
   
 // total cell 
 totalScore = roundScores.reduce((a,b) => a+b, 0); 
 scoreCells[9].innerText = totalScore;
+}
+
+// Function to highlight Round number in table
+function highlightCurrentRound() {
+  const roundCells = document.querySelectorAll("#scoreboard th")
+  const scoreCells = document.querySelectorAll("#scoreboard td");
+  roundCells.forEach((cell, index) => {
+    if (index === currentRound) {
+      cell.classList.add("current-round");
+    } else {
+      cell.classList.remove("current-round");
+    }
+  });
 }
 
 // Next Round Button and update score and round
@@ -419,23 +462,39 @@ document.getElementById('nextRoundButton').addEventListener('click', () => {
   const score = calculateRoundScore();
   roundScores[currentRound] = score;
   updateScoreboard();
+    currentRound++;
+  highlightCurrentRound();
   
-  currentRound++;
+
   newDeal(); // start next round
 });
 
+
+
 // Bind New Game button and reset score and rounds
 document.getElementById('newGameButton').addEventListener('click', () => {
+if (window.confirm("Are you sure you want to restart the game?")) {
+  // user clicked "OK" (Yes)
+  newGame();
+} else {
+  // user clicked "Cancel"
+  console.log("Canceled.");
+}
+});
+
+function newGame() {
   currentRound = 0;
-  roundScores = Array(maxRounds).fill(null);
+  roundScores = Array(maxRounds).fill(0);
   totalScore = 0;
   updateScoreboard();
   newDeal();
-});
+  highlightCurrentRound();
+}
 
 
 // Initial deal
 newDeal();
+highlightCurrentRound();
   </script>
 </body>
 </html>
