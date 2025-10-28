@@ -309,7 +309,7 @@ function moveToWaste(cardElem, cardData) {
 
   cardElem.classList.remove('back');
   cardElem.innerHTML = `
-    <div class="rank">${cardData.rank} ${cardData.suit}</div>
+    <div class="rank">${cardData.rank}${cardData.suit}</div>
     <div class="suit" style="text-align:center;">${cardData.suit}</div>
   `;
 
@@ -358,7 +358,7 @@ function newDeal() {
       card.dataset.suit = cardData.suit;
 
       card.innerHTML = `
-        <div class="rank">${cardData.rank} ${cardData.suit}</div>
+        <div class="rank">${cardData.rank}${cardData.suit}</div>
         <div class="suit" style="text-align:center;">${cardData.suit}</div>
       `;
 
@@ -502,3 +502,4 @@ lockCardTableHeight();
   </script>
 </body>
 </html>
+
