@@ -2,99 +2,198 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Card Deal Layout (Real Deck)</title>
 <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   background: #006600;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100vh;
+  justify-content: flex-start;
+  min-height: 100vh;
   margin: 0;
   color: #000;
   font-family: "Segoe UI", sans-serif;
+  padding: 10px;
+  gap: 10px;
 }
-* { user-select: none; }
-button, .card { cursor: pointer; }
-#scoreboard, table, td, th { cursor: default; }
-table,tr,th,td {
-    border: 1px solid black;
-    border-collapse: collapse;
-    text-align: center;
-    padding: 15px;
-    margin: 20px;
-    justify-content: center;
+
+/* Make everything clickable/touchable */
+button, .card {
+  cursor: pointer;
+  touch-action: manipulation;
 }
+#scoreboard, table, td, th {
+  cursor: default;
+}
+
+/* Table Styling */
+table, tr, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  text-align: center;
+  padding: 8px;
+  font-size: clamp(12px, 2vw, 16px);
+}
+
+/* Main Game Area */
 #cardTable {
   position: relative;
-  width: 950px;
-  height: 650px;
-
-  /* centers everything inside table */
+  width: 100%;
+  height: 40vh;
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center; /* center horizontally */
+  gap: 15px;
 }
 
+/* Stock & Waste Row */
+#drawPile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 40vw;
+  padding: 0 5%;
+  min-height: 100px;
+}
+
+#stack, #waste {
+  position: relative;
+  width: clamp(60px, 12vw, 100px);
+  height: clamp(80px, 16vw, 140px);
+  border: 2px dashed rgba(255,255,255,0.3);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.1);
+}
+
+#stack { transform: none; }
+#w characterise { transform: none; }
+
+/* Foundation Piles (optional) */
+#foundations {
+  display: flex;
+  gap: 10px;
+}
+.foundation {
+  width: clamp(60px, 12vw, 100px);
+  height: clamp(80px, 16vw, 140px);
+  border: 2px dashed rgba(255,255,255,0.3);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.1);
+}
+
+/* Columns (Tableau) */
 #columns {
   display: flex;
-  justify-content: center; /* center the whole 7-column group */
-  gap: 20px;
+  justify-content: center;
+  gap: clamp(8px, 2vw, 20px);
+  width: 100%;
+  padding: 0 2%;
 }
 
 .column {
   position: relative;
-  width: 80px;
-  height: 240px; /* enough for 5 rows overlapping */
+  flex: 1;
+  min-width: 60px;
+  max-width: 140px;
 }
 
+/* Card Styling */
 .card {
   position: absolute;
-  width: 80px;
-  height: 120px;
+  width: 100%;
+  height: clamp(80px, 16vw, 140px);
   border-radius: 8px;
   border: 1px solid #111;
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 6px;
+  font-size: clamp(10px, 2.5vw, 18px);
+  transition: transform 0.4s ease;
+  z-index: 1;
 }
 
-.suit { font-size: 20px; }
-.rank { font-weight: bold; }
+.card.dragging {
+  z-index: 1000;
+  transform: rotate(5deg) scale(1.05);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+
+/* Card Content */
+.suit {
+  font-size: clamp(14px, 3vw, 24px);
+}
+.rank {
+  font-weight: bold;
+  font-size: clamp(16px, 3.5vw, 26px);
+}
 .red { color: red; }
+
+/* Card Back */
 .back {
   background: linear-gradient(135deg, #0044cc, #0077ff);
   border: 2px solid white;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.counter {
-    font-size: 40px;
-    color: rgba(0,0,0,.5);
-}
-
-
-#stack {
-  position: absolute;
-  bottom: 250px;
-  width: 80px;
-  transform: translateX(-100%);
-}
-#waste {
-  position: absolute;
-  bottom: 250px;
-  width: 80px;
-  transform: translateX(100%);
+  color: white;
+  font-size: clamp(24px, 5vw, 40px);
+  font-weight: bold;
 }
 
+/* Card Flip Animation */
 .flip {
-  transition: transform 0.4s;
   transform: rotateY(180deg);
+}
+
+/* Overlapping Cards in Column */
+.column .card {
+  top: 0;
+  left: 0;
+}
+
+.column .card:nth-child(1) { top: 0; }
+.column .card:nth-child(2) { top: 18%; }
+.column .card:nth-child(3) { top: 36%; }
+.column .card:nth-child(4) { top: 54%; }
+.column .card:nth-child(5) { top: 72%; }
+.column .card:nth-child(6) { top: 90%; }
+.column .card:nth-child(7) { top: 108%; }
+/* Add more as needed */
+
+/* Counter (optional) */
+.counter {
+  font-size: clamp(32px, 8vw, 60px);
+  color: rgba(0,0,0,.5);
+  text-align: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  #topRow {
+    padding: 0 2%;
+    gap: 10px;
+  }
+  #columns {
+    gap: 6px;
+    padding: 0 1%;
+  }
+  .column .card:nth-child(n+6) {
+    top: calc(18% * (n - 1)) !important; /* Stack tighter */
+  }
 }
 
 </style>
@@ -130,9 +229,12 @@ table,tr,th,td {
 
   <div id="cardTable">
     <div id="columns"></div>
+  </div>
+  <div id="drawPile">
     <div id="stack"></div>
     <div id="waste"></div>
-  </div>
+    </div>
+    
   <div id="menuButtons">
     <button id="newGameButton">New Game</button>
     <button id="nextRoundButton">Next Round</button>
@@ -230,7 +332,6 @@ function newDeal() {
       card.innerHTML = `
         <div class="rank">${cardData.rank} ${cardData.suit}</div>
         <div class="suit" style="text-align:center; font-size:40px;">${cardData.suit}</div>
-        <div class="rank" style="text-align:left; transform:rotate(180deg);">${cardData.rank} ${cardData.suit}</div>
       `;
 
       // Only top card clickable
