@@ -6,11 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
-
   <style>
     html, body { margin: 0; height: 100%; width: 100%; }
-    #map { height: 100%; width: 100%; }
+    #map { height: 100vh; width: 100vw; }
     .overlay {
+      display: flex;
+      flex-direction: column;
       position: absolute;
       top: 10px;
       left: 10px;
@@ -25,18 +26,32 @@
     }
     .overlay label {
       display: block;
-      margin: 6px 0;
+      margin: 3px 0;
       cursor: pointer;
     }
 
     .overlay input[type="checkbox"] {
       margin-right: 8px;
     }
+    .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+      border-top-color: #0093ff;
+    }
+    .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+      border-bottom-color: #0093ff;
+    }
+    .maplibregl-popup-anchor-left .maplibregl-popup-tip {
+      border-right-color: #0093ff;
+    }
+    .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+      border-left-color: #0093ff;
+    }
     .maplibregl-popup-content {
       display: flex;
       flex-direction: column;
       background: #373434;
       color: ivory;
+      border-radius:10px;
+      border: 4px solid #0093ff;
     }
     .maplibregl-popup-close-button {
       color: white;
@@ -45,23 +60,71 @@
       color: #0093ff;
       text-decoration: underline;
       text-align:center;
+      font-size:larger;
     }
+    p {
+      text-align: center;
+    }
+    .icon {
+      font-size: 1.6em;
+    }
+    #layers-toggle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  border: none;
+  opacity: 0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Overlay default (desktop) */
+.overlay {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Mobile behavior */
+@media (max-width: 768px) {
+  #layers-toggle {
+    opacity:1;
+  }
+  .overlay {
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .overlay.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .overlay strong {
+    opacity: 0;
+  }
+}
   </style>
 </head>
 <body>
 
 <div id="map"></div>
-
+<button id="layers-toggle">☰ Layers</button>
 <div class="overlay">
-  <strong>Weather Layers</strong><br>
-  <label><input type="checkbox" id="precipitation" checked> Precipitation</label>
-  <label><input type="checkbox" id="clouds" > Clouds</label>
-  <label><input type="checkbox" id="temp" > Temperature</label>
-  <label><input type="checkbox" id="wind" > Wind</label>
-  <label><input type="checkbox" id="pressure"> Pressure</label>
-  <label><input type="checkbox" id="earthquakes" > Earthquakes (M2.5+ last 7 days)</label>
+  <strong>Layers</strong><br>
+  <label><input type="checkbox" id="precipitation" checked>Precipitation</label>
+  <label><input type="checkbox" id="clouds" >Clouds</label>
+  <label><input type="checkbox" id="temp" >Temperature</label>
+  <label><input type="checkbox" id="wind" >Wind</label>
+  <label><input type="checkbox" id="pressure">Pressure</label>
+  <label><input type="checkbox" id="earthquakes" >Earthquakes (M2.5+)</label>
+  <label><input type="checkbox" id='earthquakes-all'>All Earthquakes (7 days)</label>
   <br>
-  <small>Scroll: Zoom | Right-click+drag: Rotate | Shift+drag: Pitch</small>
+  <!--<small>Right-click+drag: Rotate + Tilt | Shift+drag: Zoom to area</small>-->
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
@@ -75,6 +138,7 @@ const weatherLayers = {
   wind: { name: 'wind_new', opacity: 1 },
   pressure: { name: 'pressure_new', opacity: 1}
 };
+
 
 const map = new maplibregl.Map({
   container: 'map',
@@ -108,7 +172,6 @@ const map = new maplibregl.Map({
     ]
   }
 });
-
 map.addControl(
   new maplibregl.NavigationControl({
     visualizePitch: true,
@@ -122,7 +185,9 @@ map.on('load', () => {
   closeButton: true,
   closeOnClick: true
 });
-
+function toTitleCase(str) {
+  return str.replace(/(^\w|\s\w)(?=\w*)/g, m => m.toUpperCase());
+}
 map.on('click', async (e) => {
   const features = map.queryRenderedFeatures(e.point, {layers: ['earthquakes-layer']});
   if (features.length > 0) {
@@ -143,20 +208,30 @@ map.on('click', async (e) => {
     const feels = Math.round(data.main.feels_like);
     const wind = Math.round(data.wind.speed);
     const windDir = data.wind.deg ?? '–';
-    const pressure = data.main.pressure;
+    const pressure = Math.round(data.main.pressure*.02953,2);
     const humidity = data.main.humidity;
     const clouds = data.clouds.all;
+    const rawDescr = data.weather[0]?.description ?? 'Unknown';
+    const descr = toTitleCase(rawDescr);
+    const sunrise = new Date(data.sys.sunrise*1000).toLocaleTimeString();
+    const sunset = new Date(data.sys.sunset*1000).toLocaleTimeString();
+    const name = data.name;
+
+
 
     popup
       .setLngLat([lng, lat])
       .setHTML(`
-        <strong>Weather at location</strong>
-        🌡 Temp: ${temp} °F<br>
-        🤔 Feels like: ${feels} °F<br>
-        💨 Wind: ${wind} mph (${windDir}°)<br>
-        🧭 Pressure: ${pressure} hPa<br>
-        💧 Humidity: ${humidity}%<br>
-        ☁️ Clouds: ${clouds}%
+        <strong>${name}</strong>
+        <p>${descr}</p>
+        <span><span class='icon'>🌡</span> Temp: ${temp} °F<br></span>
+        <span><span class='icon'>🤔</span> Feels like: ${feels} °F<br></span>
+        <span><span class='icon'>💨</span> Wind: ${wind} mph (${windDir}°)<br></span>
+        <span><span class='icon'>🧭</span> Pressure: ${pressure} inHg<br></span>
+        <span><span class='icon'>💧</span> Humidity: ${humidity}%<br></span>
+        <span><span class='icon'>☁️</span> Clouds: ${clouds}%<br></span>
+        <span><span class='icon'>\u{1F305}</span> Sunrise: ${sunrise}<br></span>
+        <span><span class='icon'>\u{1F305}</span> Sunset: ${sunset}</span>
       `)
       .addTo(map);
 
@@ -258,11 +333,80 @@ map.setPaintProperty('osm', 'raster-saturation', 0);
         type: 'raster',
         source: `${key}-source`,
         paint,
-        layout: { visibility: 'none' }
+        layout: { visibility: 'visible' }
       },
       '3d-buildings'
     );
     // Earthquakes source (remote GeoJSON)
+if (!map.getSource('earthquakes-all')) {
+  map.addSource('earthquakes-all', {
+    type: 'geojson',
+    data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson'
+  });
+}
+
+// Earthquakes layer - circles styled by mag (size) and depth (color)
+if (!map.getLayer('earthquakes-all-layer')) {
+  map.addLayer({
+  id: 'earthquakes-all-layer',
+  type: 'circle',
+  source: 'earthquakes-all',
+  paint: {
+    'circle-radius': [
+      'interpolate',
+      ['linear'],
+      ['get', 'mag'],
+      0.0, 4,
+      2.5, 8,
+      4, 12,
+      6, 16
+    ],
+'circle-color': [
+  'interpolate',
+  ['linear'],
+  ['get', 'mag'],
+  0.0, 'blue',
+  2.5, 'green',  // green for small
+  4.0, '#ffff00',  // yellow
+  5.0, '#ffa500',  // orane
+  6.0, '#ff0000'   // red for strong
+],
+    'circle-opacity': 0.9,
+    'circle-stroke-width': 1
+  },
+  layout: {
+    'visibility': 'visible'  // matches checkbox "checked"
+  }
+});
+}
+
+// Click popup with useful info
+map.on('click', 'earthquakes-all-layer', (e) => {
+  if (!e.features.length) return;
+  const feature = e.features[0];
+  const props = feature.properties;
+  const coords = feature.geometry.coordinates;
+  const time = new Date(props.time).toLocaleString();
+
+  const html = `
+    <h3>${props.title || 'Earthquake'}</h3>
+    <p><strong>Magnitude:</strong> ${props.mag}</p>
+    <p><strong>Time:</strong> ${time}</p>
+    <p><strong>Location:</strong> ${props.place}</p>
+    <a href="${props.url}" target="_blank">USGS Details →</a>
+  `;
+
+popup
+    .setLngLat(e.lngLat)
+    .setHTML(html)
+    .addTo(map);
+});
+
+// Cursor pointer on hover
+map.on('mouseenter', 'earthquakes-all-layer', () => { map.getCanvas().style.cursor = 'pointer'; });
+map.on('mouseleave', 'earthquakes-all-layer', () => { map.getCanvas().style.cursor = ''; });
+
+// Earthquakes source (remote GeoJSON)
 if (!map.getSource('earthquakes')) {
   map.addSource('earthquakes', {
     type: 'geojson',
@@ -281,6 +425,7 @@ if (!map.getLayer('earthquakes-layer')) {
       'interpolate',
       ['linear'],
       ['get', 'mag'],
+      0.0, 4,
       2.5, 8,
       4, 12,
       6, 16
@@ -289,21 +434,20 @@ if (!map.getLayer('earthquakes-layer')) {
   'interpolate',
   ['linear'],
   ['get', 'mag'],
+  0.0, 'blue',
   2.5, 'green',  // green for small
   4.0, '#ffff00',  // yellow
   5.0, '#ffa500',  // orane
   6.0, '#ff0000'   // red for strong
 ],
     'circle-opacity': 0.9,
-    'circle-stroke-width': 2,
-    'circle-stroke-color': '#ffffff'
+    'circle-stroke-width': 1
   },
   layout: {
     'visibility': 'visible'  // matches checkbox "checked"
   }
 });
 }
-
 // Click popup with useful info
 map.on('click', 'earthquakes-layer', (e) => {
   if (!e.features.length) return;
@@ -337,23 +481,43 @@ setInterval(() => {
     source.setData('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson');
   }
 }, 60000);
+setInterval(() => {
+  const source = map.getSource('earthquakes-all');
+  if (source) {
+    source.setData('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson');
+  }
+}, 60000);
   });
 
   /* ============================
      TOGGLE HANDLER
   ============================ */
-function toggleLayer(layerId, visible) {
+function toggleLayer(layerId, enabled) {
+  // Earthquakes (M2.5+)
   if (layerId === 'earthquakes') {
-    const visibility = visible ? 'visible' : 'none';
-    map.setLayoutProperty('earthquakes-layer', 'visibility', visibility);
-
-  } else {
-    // Existing raster weather layers
-    const visibility = visible ? 'visible' : 'none';
-    map.setLayoutProperty(`${layerId}-layer`, 'visibility', visibility);
-    map.setPaintProperty(`${layerId}-layer`, 'raster-opacity', visible ? weatherLayers[layerId].opacity : 0);
+    map.setLayoutProperty(
+      'earthquakes-layer',
+      'visibility',
+      enabled ? 'visible' : 'none'
+    );
+    return;
   }
+
+  // All earthquakes
+  if (layerId === 'earthquakes-all') {
+    map.setLayoutProperty(
+      'earthquakes-all-layer',
+      'visibility',
+      enabled ? 'visible' : 'none'
+    );
+    return;
+  }
+
+  // Weather layers (opacity toggle)
+  const opacity = enabled ? weatherLayers[layerId].opacity : 0;
+  map.setPaintProperty(`${layerId}-layer`, 'raster-opacity', opacity);
 }
+
 /* ====================
      INITIAL CHECKBOX STATE
   ============================ */
@@ -364,6 +528,29 @@ function toggleLayer(layerId, visible) {
       cb.addEventListener('change', () => toggleLayer(cb.id, cb.checked));
     });
 
+});
+const toggleBtn = document.getElementById('layers-toggle');
+const overlay = document.querySelector('.overlay');
+
+toggleBtn.addEventListener('click', () => {
+  overlay.classList.toggle('open');
+});
+
+  /* ====================
+     KEYBOARD SHORTCUT FOR MAP ZOOM
+  ============================ */
+document.addEventListener('keydown', (e) => {
+  // Example: press "r" to reset view
+  if (e.key.toLowerCase() === 'f') {
+    map.easeTo({
+      center: [-98.5, 39.5],
+      zoom: 4,
+      bearing: 0,
+      pitch: 0,
+      duration: 1000,
+      essential: true
+    });
+  }
 });
 </script>
 </body>
